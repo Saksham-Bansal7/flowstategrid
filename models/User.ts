@@ -7,7 +7,9 @@ export interface IUser {
   email: string;
   emailVerified?: Date;
   image?: string;
-  password?: string; // For credentials provider
+  password?: string;
+  bio?: string;
+  location?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,7 +20,9 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true },
     emailVerified: { type: Date },
     image: { type: String },
-    password: { type: String }, // Only for credentials login
+    password: { type: String },
+    bio: { type: String, maxlength: 500 },
+    location: { type: String, maxlength: 100 },
   },
   {
     timestamps: true,

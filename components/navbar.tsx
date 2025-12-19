@@ -4,15 +4,7 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { 
-  LogIn, 
-  LogOut, 
-  User, 
-  Menu, 
-  X,
-  Github,
-  Mail
-} from "lucide-react";
+import { LogIn, LogOut, User, Menu, X, Github, Mail } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 
@@ -25,8 +17,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="flex items-center space-x-2 text-xl font-bold"
           >
             <span className="text-2xl">🚀</span>
@@ -35,14 +27,29 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link
+              href="/dashboard"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
               Dashboard
             </Link>
-            <Link href="/features" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link
+              href="/features"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
               Features
             </Link>
-            <Link href="/pricing" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link
+              href="/pricing"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
               Pricing
+            </Link>
+            <Link
+              href="/profile"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Profile
             </Link>
           </div>
 
@@ -68,29 +75,18 @@ export default function Navbar() {
                     {session.user.name || session.user.email}
                   </span>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => signOut()}
-                >
+                <Button variant="outline" size="sm" onClick={() => signOut()}>
                   <LogOut />
                   Sign Out
                 </Button>
               </div>
             ) : (
               <>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => signIn()}
-                >
+                <Button variant="ghost" size="sm" onClick={() => signIn()}>
                   <LogIn />
                   Sign In
                 </Button>
-                <Button 
-                  size="sm"
-                  onClick={() => signIn()}
-                >
+                <Button size="sm" onClick={() => signIn()}>
                   Get Started
                 </Button>
               </>
@@ -102,35 +98,46 @@ export default function Navbar() {
             className="md:hidden p-2 rounded-md hover:bg-accent"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+            {mobileMenuOpen ? (
+              <X className="size-6" />
+            ) : (
+              <Menu className="size-6" />
+            )}
           </button>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 space-y-3 border-t">
-            <Link 
-              href="/dashboard" 
+            <Link
+              href="/dashboard"
               className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
               Dashboard
             </Link>
-            <Link 
-              href="/features" 
+            <Link
+              href="/features"
               className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
               Features
             </Link>
-            <Link 
-              href="/pricing" 
+            <Link
+              href="/pricing"
               className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
               Pricing
             </Link>
-            
+            <Link 
+              href="/profile"
+              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Profile
+            </Link>
+
             <div className="pt-3 border-t space-y-2">
               {status === "loading" ? (
                 <div className="h-9 animate-pulse bg-muted rounded-md" />
@@ -152,8 +159,8 @@ export default function Navbar() {
                       {session.user.name || session.user.email}
                     </span>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={() => {
                       signOut();
@@ -166,8 +173,8 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     className="w-full"
                     onClick={() => {
                       signIn();
@@ -177,7 +184,7 @@ export default function Navbar() {
                     <LogIn />
                     Sign In
                   </Button>
-                  <Button 
+                  <Button
                     className="w-full"
                     onClick={() => {
                       signIn();
