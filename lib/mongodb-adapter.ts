@@ -35,7 +35,7 @@ async createUser(user: IUser) {
       const user = await User.findById(id).lean();
       if (!user) return null;
       return {
-        id: (user._id as mongoose.Types.ObjectId).toString(),
+        id: user._id,
         name: user.name,
         email: user.email,
         emailVerified: user.emailVerified ?? null,
@@ -48,7 +48,7 @@ async createUser(user: IUser) {
       const user = await User.findOne({ email }).lean();
       if (!user) return null;
       return {
-        id: (user._id as mongoose.Types.ObjectId).toString(),
+        id: user._id,
         name: user.name,
         email: user.email,
         emailVerified: user.emailVerified ?? null,
@@ -63,7 +63,7 @@ async createUser(user: IUser) {
       const user = await User.findById(account.userId).lean();
       if (!user) return null;
       return {
-        id: (user._id as mongoose.Types.ObjectId).toString(),
+        id: user._id,
         name: user.name,
         email: user.email,
         emailVerified: user.emailVerified ?? null,
@@ -77,7 +77,7 @@ async createUser(user: IUser) {
       const updatedUser = await User.findByIdAndUpdate(id, data, { new: true }).lean();
       if (!updatedUser) throw new Error('User not found');
       return {
-        id: (updatedUser._id as mongoose.Types.ObjectId).toString(),
+        id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
         emailVerified: updatedUser.emailVerified ?? null,
@@ -126,7 +126,7 @@ async createUser(user: IUser) {
           expires: session.expires,
         },
         user: {
-          id: (user._id as mongoose.Types.ObjectId).toString(),
+          id: user._id,
           name: user.name,
           email: user.email,
           emailVerified: user.emailVerified ?? null,
