@@ -26,7 +26,7 @@ export async function GET(req: Request) {
     if (allUsersWithToken) {
       console.log("⏰ Token expiry:", allUsersWithToken.verificationTokenExpiry);
       console.log("🕐 Current time:", new Date());
-      console.log("✅ Token valid:", allUsersWithToken.verificationTokenExpiry > new Date());
+      console.log("✅ Token valid:", allUsersWithToken.verificationTokenExpiry && allUsersWithToken.verificationTokenExpiry > new Date());
     }
 
     // Find user with this token

@@ -5,6 +5,7 @@ import { useUserProfile, useUpdateUserProfile } from "@/hooks/use-user-profile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import LocationPicker from "@/components/location-picker";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Loader2, User as UserIcon, MapPin, Mail, Calendar, Check, X } from "lucide-react";
@@ -213,20 +214,16 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="location" className="text-sm font-medium">
-                      Location
-                    </label>
-                    <Input
-                      id="location"
-                      type="text"
-                      placeholder="City, Country"
-                      value={formData.location}
-                      onChange={(e) =>
-                        setFormData({ ...formData, location: e.target.value })
-                      }
-                      maxLength={100}
-                    />
-                  </div>
+  <label htmlFor="location" className="text-sm font-medium">
+    Location
+  </label>
+  <LocationPicker
+    value={formData.location}
+    onChange={(value) =>
+      setFormData({ ...formData, location: value })
+    }
+  />
+</div>
 
                   <div className="flex space-x-2">
                     <Button
