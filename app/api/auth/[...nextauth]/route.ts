@@ -8,6 +8,7 @@ import { User } from "@/models/User";
 import { connectDB } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
+// app/api/auth/[...nextauth]/route.ts
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(),
   providers: [
@@ -46,11 +47,15 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Allow login even if email not verified (optional)
+        // But you can add a check here if you want to block unverified users
+
         return {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
           image: user.image,
+          emailVerified: user.emailVerified,
         };
       },
     }),
@@ -62,21 +67,27 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
+        token.emailVerified = user.emailVerified?.toISOString();
       }
       if (account) {
         token.accessToken = account.access_token;
+        // OAuth providers = always verified
+        if (account.provider !== "credentials") {
+          token.emailVerified = new Date().toISOString();
+        }
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.emailVerified = token.emailVerified as string | null;
       }
       return session;
     },
   },
   pages: {
-    signIn: "/auth/signin", // Custom sign-in page (create this later)
+    signIn: "/auth/signin",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

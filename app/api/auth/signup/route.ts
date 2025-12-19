@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
 import bcrypt from "bcryptjs";
+import { generateVerificationToken, getVerificationTokenExpiry, sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -37,17 +38,32 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
+    const verificationTokenExpiry = getVerificationTokenExpiry();
+
+    console.log("🎫 Generated verification token:", verificationToken);
+    console.log("⏰ Token expires at:", verificationTokenExpiry);
+
     // Create user
     const user = await User.create({
       name: name || email.split("@")[0],
       email,
       password: hashedPassword,
       emailVerified: null,
+      verificationToken,
+      verificationTokenExpiry,
     });
+
+    console.log("✅ User created with ID:", user._id);
+    console.log("🔑 Token saved:", user.verificationToken);
+
+    // Send verification email
+    await sendVerificationEmail(email, verificationToken);
 
     return NextResponse.json(
       {
-        message: "User created successfully",
+        message: "User created successfully. Please check your email to verify your account.",
         user: {
           id: user._id.toString(),
           name: user.name,

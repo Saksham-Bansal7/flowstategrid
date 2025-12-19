@@ -117,6 +117,40 @@ export default function ProfilePage() {
                 )}
               </div>
             </CardHeader>
+{!profile.emailVerified && (
+  <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
+    <CardContent className="pt-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="font-medium">Email not verified</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Please check your inbox for a verification email.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={async () => {
+            try {
+              const response = await fetch("/api/auth/resend-verification", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: profile.email }),
+              });
+              if (response.ok) {
+                alert("Verification email sent!");
+              }
+            } catch (error) {
+              alert("Failed to send email");
+            }
+          }}
+        >
+          Resend Email
+        </Button>
+      </div>
+    </CardContent>
+  </Card>
+)}
             <CardContent className="space-y-6">
               {/* Profile Image */}
               <div className="flex items-center space-x-4">

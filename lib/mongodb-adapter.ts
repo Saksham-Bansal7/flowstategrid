@@ -9,18 +9,26 @@ import mongoose from 'mongoose';
 
 export function MongoDBAdapter(): Adapter {
   return {
-    async createUser(user : IUser) {
-      await connectDB();
-      const newUser = await User.create(user);
-      const userObj = newUser.toObject();
-      return {
-        id: userObj._id.toString(),
-        name: userObj.name,
-        email: userObj.email,
-        emailVerified: userObj.emailVerified ?? null,
-        image: userObj.image,
-      };
-    },
+    // lib/mongodb-adapter.ts - Update createUser method
+async createUser(user: IUser) {
+  await connectDB();
+  
+  // Auto-verify if this is an OAuth signup (no password)
+  const userData = {
+    ...user,
+    emailVerified: user.password ? null : new Date(), // OAuth = auto-verified
+  };
+  
+  const newUser = await User.create(userData);
+  const userObj = newUser.toObject();
+  return {
+    id: userObj._id.toString(),
+    name: userObj.name,
+    email: userObj.email,
+    emailVerified: userObj.emailVerified ?? null,
+    image: userObj.image,
+  };
+},
 
     async getUser(id) {
       await connectDB();
