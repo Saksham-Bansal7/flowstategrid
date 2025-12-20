@@ -4,25 +4,16 @@ import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
 import bcrypt from "bcryptjs";
 import { generateVerificationToken, getVerificationTokenExpiry, sendVerificationEmail } from "@/lib/email";
+import { signupSchema } from "@/lib/validations/auth";
+import { z } from "zod";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const body = await req.json();
 
-    // Validate input
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
-        { status: 400 }
-      );
-    }
+    // Validate input with Zod
+    const validatedData = signupSchema.parse(body);
+    const { name, email, password } = validatedData;
 
     await connectDB();
 
@@ -73,6 +64,12 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: error.issues[0].message },
+        { status: 400 }
+      );
+    }
     console.error("Signup error:", error);
     return NextResponse.json(
       { error: "An error occurred during signup" },

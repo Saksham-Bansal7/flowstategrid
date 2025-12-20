@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
+import { updateProfileSchema } from "@/lib/validations/auth";
+import { z } from "zod";
 
 // GET: Fetch user profile
 export async function GET(req: Request) {
@@ -50,23 +52,11 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const data = await req.json();
-    const { name, bio, location } = data;
+    const body = await req.json();
 
-    // Validation
-    if (bio && bio.length > 500) {
-      return NextResponse.json(
-        { error: "Bio must be less than 500 characters" },
-        { status: 400 }
-      );
-    }
-
-    if (location && location.length > 100) {
-      return NextResponse.json(
-        { error: "Location must be less than 100 characters" },
-        { status: 400 }
-      );
-    }
+    // Validate input with Zod
+    const validatedData = updateProfileSchema.parse(body);
+    const { name, bio, location } = validatedData;
 
     await connectDB();
     const user = await User.findByIdAndUpdate(
@@ -95,6 +85,12 @@ export async function PUT(req: Request) {
       updatedAt: user.updatedAt,
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: error.issues[0].message },
+        { status: 400 }
+      );
+    }
     console.error("Profile update error:", error);
     return NextResponse.json(
       { error: "Failed to update profile" },

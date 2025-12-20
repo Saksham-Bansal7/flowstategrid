@@ -3,17 +3,16 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
 import { generateVerificationToken, getVerificationTokenExpiry, sendVerificationEmail } from "@/lib/email";
+import { resendVerificationSchema } from "@/lib/validations/auth";
+import { z } from "zod";
 
 export async function POST(req: Request) {
   try {
-    const { email } = await req.json();
+    const body = await req.json();
 
-    if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
-    }
+    // Validate input with Zod
+    const validatedData = resendVerificationSchema.parse(body);
+    const { email } = validatedData;
 
     await connectDB();
 
@@ -48,6 +47,12 @@ export async function POST(req: Request) {
       message: "Verification email sent successfully",
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: error.issues[0].message },
+        { status: 400 }
+      );
+    }
     console.error("Resend verification error:", error);
     return NextResponse.json(
       { error: "Failed to resend verification email" },
