@@ -3,10 +3,22 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Plus, Users, Lock, Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -34,20 +46,20 @@ export default function StudyRoomsPage() {
 
   const handleCreateRoom = async () => {
     setCreateError("");
-    
+
     // Validation
     if (!formData.name.trim()) {
       setCreateError("Room name is required");
       return;
     }
-    
+
     if (!formData.isPublic && !formData.password) {
       setCreateError("Password is required for private rooms");
       return;
     }
-    
+
     setIsCreating(true);
-    
+
     try {
       const response = await fetch("/api/rooms/create", {
         method: "POST",
@@ -56,7 +68,7 @@ export default function StudyRoomsPage() {
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         setIsCreateDialogOpen(false);
         // Reset form
@@ -96,7 +108,10 @@ export default function StudyRoomsPage() {
               </p>
             </div>
 
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <Dialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+            >
               <DialogTrigger asChild>
                 <Button>
                   <Plus />
@@ -129,7 +144,10 @@ export default function StudyRoomsPage() {
                       placeholder="Studying for finals..."
                       value={formData.description}
                       onChange={(e) =>
-                        setFormData({ ...formData, description: e.target.value })
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -139,7 +157,13 @@ export default function StudyRoomsPage() {
                       <Button
                         type="button"
                         variant={formData.isPublic ? "default" : "outline"}
-                        onClick={() => setFormData({ ...formData, isPublic: true, password: "" })}
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            isPublic: true,
+                            password: "",
+                          })
+                        }
                       >
                         <Globe className="mr-2 h-4 w-4" />
                         Public
@@ -147,7 +171,9 @@ export default function StudyRoomsPage() {
                       <Button
                         type="button"
                         variant={!formData.isPublic ? "default" : "outline"}
-                        onClick={() => setFormData({ ...formData, isPublic: false })}
+                        onClick={() =>
+                          setFormData({ ...formData, isPublic: false })
+                        }
                       >
                         <Lock className="mr-2 h-4 w-4" />
                         Private
@@ -167,8 +193,8 @@ export default function StudyRoomsPage() {
                       />
                     </div>
                   )}
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     onClick={handleCreateRoom}
                     disabled={isCreating}
                   >
@@ -185,15 +211,22 @@ export default function StudyRoomsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {rooms?.map((room: any) => (
-                <Card key={room.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={room.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
                         {room.name}
-                        {!room.isPublic && <Lock className="h-4 w-4 text-muted-foreground" />}
+                        {!room.isPublic && (
+                          <Lock className="h-4 w-4 text-muted-foreground" />
+                        )}
                       </CardTitle>
                     </div>
-                    <CardDescription>{room.description || "No description"}</CardDescription>
+                    <CardDescription>
+                      {room.description || "No description"}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">

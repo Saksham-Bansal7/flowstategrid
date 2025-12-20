@@ -9,14 +9,83 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function RoomPage({ params }: { params: Promise<{ roomId: string }> }) {
+export default function RoomPage({
+  params,
+}: {
+  params: Promise<{ roomId: string }>;
+}) {
   const { roomId } = use(params);
   const router = useRouter();
   const { data: session } = useSession();
   const [joined, setJoined] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [participants, setParticipants] = useState<Array<{userId: string, userName: string}>>([]);
+  const [participants, setParticipants] = useState<
+    Array<{ userId: string; userName: string }>
+  >([]);
+
+  // Cleanup on unmount + beforeunload popup
+  useEffect(() => {
+    if (!joined) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Show "leave site?" confirmation (preventDefault triggers browser's default message)
+      e.preventDefault();
+
+      // Use sendBeacon for reliable API call even when closing tab
+      const blob = new Blob([JSON.stringify({})], { type: "application/json" });
+      navigator.sendBeacon(`/api/rooms/${roomId}/leave`, blob);
+
+      // Return value for older browsers (custom messages are ignored, browser shows default)
+      return "";
+    };
+
+    const handlePopState = (e: PopStateEvent) => {
+      // Immediately push state back to cancel navigation
+      window.history.pushState(null, "", window.location.pathname);
+
+      // Show confirmation when user clicks browser back button
+      const confirmLeave = window.confirm(
+        "Are you sure you want to leave the room?"
+      );
+
+      if (confirmLeave) {
+        // User confirmed - cleanup and actually navigate back
+        const blob = new Blob([JSON.stringify({})], {
+          type: "application/json",
+        });
+        navigator.sendBeacon(`/api/rooms/${roomId}/leave`, blob);
+
+        // Remove listeners to prevent loop
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+        window.removeEventListener("popstate", handlePopState);
+
+        // Actually go back
+        setJoined(false);
+        window.history.back();
+      }
+      // If user cancelled, state is already pushed back so they stay on page
+    };
+
+    // Push initial state to enable popstate detection
+    window.history.pushState(null, "", window.location.pathname);
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+      // Also cleanup when unmounting (browser back button)
+      if (joined) {
+        // Use sendBeacon here too for reliability
+        const blob = new Blob([JSON.stringify({})], {
+          type: "application/json",
+        });
+        navigator.sendBeacon(`/api/rooms/${roomId}/leave`, blob);
+      }
+    };
+  }, [joined, roomId]);
 
   const handleJoin = async () => {
     try {
@@ -40,6 +109,7 @@ export default function RoomPage({ params }: { params: Promise<{ roomId: string 
   };
 
   const handleLeave = async () => {
+    setJoined(false); // Prevent beforeunload popup
     await fetch(`/api/rooms/${roomId}/leave`, { method: "POST" });
     router.push("/rooms");
   };

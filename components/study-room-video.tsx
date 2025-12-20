@@ -13,7 +13,7 @@ import { Video, VideoOff, LogOut } from "lucide-react";
 interface StudyRoomVideoProps {
   channelName: string;
   onLeave: () => void;
-  participants: Array<{userId: string, userName: string}>;
+  participants: Array<{ userId: string; userName: string }>;
   currentUserId: string;
 }
 
@@ -23,28 +23,23 @@ export default function StudyRoomVideo({
   participants,
   currentUserId,
 }: StudyRoomVideoProps) {
-  const [client, setClient] = useState<IAgoraRTCClient | null>(null);
   const [localVideoTrack, setLocalVideoTrack] =
     useState<ICameraVideoTrack | null>(null);
-  const [remoteUsers, setRemoteUsers] = useState<Map<number, IRemoteVideoTrack>>(
-    new Map()
-  );
-  const [userIdMapping, setUserIdMapping] = useState<Map<number, string>>(new Map());
+  const [remoteUsers, setRemoteUsers] = useState<
+    Map<number, IRemoteVideoTrack>
+  >(new Map());
   const [isVideoOn, setIsVideoOn] = useState(true);
-  const [localUid, setLocalUid] = useState<number | null>(null);
   const localVideoRef = useRef<HTMLDivElement>(null);
   const hasInitialized = useRef(false);
-
-  const getUserName = (userId: string) => {
-    const participant = participants.find(p => p.userId === userId);
-    return participant?.userName || "User";
-  };
+  const clientRef = useRef<IAgoraRTCClient | null>(null);
+  const videoTrackRef = useRef<ICameraVideoTrack | null>(null);
 
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
       initAgora();
     }
+
     return () => {
       cleanup();
     };
@@ -66,7 +61,7 @@ export default function StudyRoomVideo({
         codec: "vp8",
       });
 
-      setClient(agoraClient);
+      clientRef.current = agoraClient;
 
       // Listen to remote users
       agoraClient.on("user-published", async (user, mediaType) => {
@@ -74,7 +69,6 @@ export default function StudyRoomVideo({
 
         if (mediaType === "video") {
           const remoteVideoTrack = user.videoTrack!;
-          // Don't add own video to remote users
           setRemoteUsers((prev) => {
             const newMap = new Map(prev);
             newMap.set(user.uid as number, remoteVideoTrack);
@@ -92,12 +86,12 @@ export default function StudyRoomVideo({
       });
 
       // Join channel
-      const uid = await agoraClient.join(appId, channelName, token, null);
-      setLocalUid(uid as number);
+      await agoraClient.join(appId, channelName, token, null);
 
       // Create and publish local video track
       const videoTrack = await AgoraRTC.createCameraVideoTrack();
       setLocalVideoTrack(videoTrack);
+      videoTrackRef.current = videoTrack;
 
       await agoraClient.publish([videoTrack]);
 
@@ -117,17 +111,18 @@ export default function StudyRoomVideo({
     }
   };
 
-  const cleanup = async () => {
+  const cleanup = () => {
     try {
-      if (localVideoTrack) {
-        localVideoTrack.stop();
-        localVideoTrack.close();
+      if (videoTrackRef.current) {
+        videoTrackRef.current.stop();
+        videoTrackRef.current.close();
+        videoTrackRef.current = null;
         setLocalVideoTrack(null);
       }
-      if (client) {
-        await client.unpublish();
-        await client.leave();
-        setClient(null);
+      if (clientRef.current) {
+        clientRef.current.unpublish();
+        clientRef.current.leave();
+        clientRef.current = null;
       }
       setRemoteUsers(new Map());
     } catch (error) {
@@ -135,8 +130,8 @@ export default function StudyRoomVideo({
     }
   };
 
-  const handleLeave = async () => {
-    await cleanup();
+  const handleLeave = () => {
+    cleanup();
     onLeave();
   };
 
@@ -163,11 +158,12 @@ export default function StudyRoomVideo({
       {/* Remote Videos Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {Array.from(remoteUsers.entries()).map(([uid]) => {
-          // Find the participant by checking all participants except current user
-          const otherParticipants = participants.filter(p => p.userId !== currentUserId);
+          const otherParticipants = participants.filter(
+            (p) => p.userId !== currentUserId
+          );
           const index = Array.from(remoteUsers.keys()).indexOf(uid);
           const participant = otherParticipants[index];
-          
+
           return (
             <div
               key={uid}
