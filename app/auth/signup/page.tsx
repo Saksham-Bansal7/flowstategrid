@@ -1,8 +1,9 @@
 // app/auth/signup/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Github, AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
 
 export default function SignUpPage() {
+  const { data: session } = useSession();
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -21,6 +23,13 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    
+    if (session) {
+      router.push("/dashboard");
+    }
+  }, [session]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
