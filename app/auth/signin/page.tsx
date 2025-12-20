@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Github, Mail } from "lucide-react";
+import { Github, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -13,20 +13,29 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     
     try {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: true,
-        callbackUrl: "/dashboard",
+        redirect: false, // Don't redirect automatically
       });
+
+      if (result?.error) {
+        setError("Invalid email or password");
+      } else if (result?.ok) {
+        // Redirect to dashboard on success
+        window.location.href = "/dashboard";
+      }
     } catch (error) {
       console.error("Sign in error:", error);
+      setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -92,6 +101,14 @@ export default function SignInPage() {
               </span>
             </div>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+              <AlertCircle className="size-4" />
+              <span>{error}</span>
+            </div>
+          )}
 
           {/* Credentials Form */}
           <form onSubmit={handleCredentialsSignIn} className="space-y-3">
