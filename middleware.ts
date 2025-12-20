@@ -8,6 +8,9 @@ export default withAuth(
     const isAuth = !!token;
     const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
     const isDashboard = req.nextUrl.pathname.startsWith("/dashboard");
+    const isRooms = req.nextUrl.pathname.startsWith("/rooms");
+    const isProfile = req.nextUrl.pathname.startsWith("/profile");
+    const isProtected = isDashboard || isRooms || isProfile;
 
     console.log("🔒 Middleware running:", {
       path: req.nextUrl.pathname,
@@ -22,7 +25,7 @@ export default withAuth(
     }
 
     // If user is not authenticated and tries to access protected routes
-    if (isDashboard && !isAuth) {
+    if (isProtected && !isAuth) {
       console.log("❌ Unauthenticated user on protected page -> redirecting to signin");
       let from = req.nextUrl.pathname;
       if (req.nextUrl.search) {
@@ -40,19 +43,7 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => {
-        // This callback determines if the middleware should run
-        // Return true to allow, false to redirect to sign-in
-        const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
-        
-        // Always allow auth pages
-        if (isAuthPage) {
-          return true;
-        }
-        
-        // For protected routes, require token
-        return !!token;
-      },
+      authorized: () => true, // Always run the middleware function
     },
     pages: {
       signIn: "/auth/signin",
@@ -66,7 +57,7 @@ export const config = {
     // Protected routes
     "/dashboard/:path*",
     "/profile/:path*",
-    "/settings/:path*",
+    "/rooms/:path*",
     
     // Auth routes (to redirect if already logged in)
     "/auth/signin",

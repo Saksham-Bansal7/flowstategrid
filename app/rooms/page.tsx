@@ -1,7 +1,7 @@
 // app/rooms/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -20,9 +20,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus, Users, Lock, Globe } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function StudyRoomsPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -34,6 +36,11 @@ export default function StudyRoomsPage() {
     password: "",
     maxParticipants: 20,
   });
+  useEffect(() => {
+      if (status === "unauthenticated") {
+        redirect("/auth/signin");
+      }
+    }, [status]);
 
   const { data: rooms, isLoading } = useQuery({
     queryKey: ["rooms"],
@@ -96,7 +103,7 @@ export default function StudyRoomsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+    <div className="min-h-screen bg-linear-to-br from-background to-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="space-y-8">
           {/* Header */}

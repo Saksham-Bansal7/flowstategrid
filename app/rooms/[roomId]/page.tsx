@@ -115,7 +115,7 @@ export default function RoomPage({
   };
 
   if (!session) {
-    return <div>Please sign in to join rooms</div>;
+    return <div className="p-10 text-center">Please sign in to join rooms</div>;
   }
 
   if (!joined) {
@@ -145,7 +145,7 @@ export default function RoomPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+    <div className="min-h-screen bg-linear-to-br from-background to-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <StudyRoomVideo
           channelName={roomId}

@@ -91,7 +91,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+    <div className="min-h-screen bg-linear-to-br from-background to-muted">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="space-y-6">
           {/* Header */}
@@ -205,7 +205,7 @@ export default function ProfilePage() {
                       onChange={(e) =>
                         setFormData({ ...formData, bio: e.target.value })
                       }
-                      className="w-full min-h-[100px] px-3 py-2 rounded-md border bg-background text-sm resize-none"
+                      className="w-full min-h-25 px-3 py-2 rounded-md border bg-background text-sm resize-none"
                       maxLength={500}
                     />
                     <p className="text-xs text-muted-foreground">
