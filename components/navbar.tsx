@@ -34,16 +34,10 @@ export default function Navbar() {
               Dashboard
             </Link>
             <Link
-              href="/features"
+              href="/rooms"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
-              Features
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Pricing
+              Study Rooms
             </Link>
             <Link
               href="/profile"
@@ -117,20 +111,13 @@ export default function Navbar() {
               Dashboard
             </Link>
             <Link
-              href="/features"
+              href="/rooms"
               className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Features
+              Study Rooms
             </Link>
             <Link
-              href="/pricing"
-              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Pricing
-            </Link>
-            <Link 
               href="/profile"
               className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
               onClick={() => setMobileMenuOpen(false)}

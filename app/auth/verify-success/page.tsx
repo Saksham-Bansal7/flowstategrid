@@ -20,7 +20,7 @@ export default function VerifySuccessPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Link href="/auth/signin">
+          <Link href="/dashboard">
             <Button className="w-full">
               Sign In
             </Button>
