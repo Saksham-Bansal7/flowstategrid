@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import ImageUpload from "@/components/image-upload";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LocationPicker from "@/components/location-picker";
@@ -25,11 +26,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const { data: profile, isLoading, error } = useUserProfile();
   const updateProfile = useUpdateUserProfile();
+  const queryClient = useQueryClient();
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -174,29 +177,52 @@ export default function ProfilePage() {
             )}
             <CardContent className="space-y-6">
               {/* Profile Image */}
-              <div className="flex items-center space-x-4">
-                {profile.image ? (
-                  <Image
-                    src={profile.image}
-                    alt={profile.name || "Profile"}
-                    width={80}
-                    height={80}
-                    className="rounded-full"
+              {isEditing ? (
+                <div className="flex flex-col items-center py-4">
+                  <ImageUpload
+                    currentImage={profile.image || undefined}
+                    onUploadSuccess={(imageUrl) => {
+                      // Invalidate and refetch profile
+                      queryClient.invalidateQueries({
+                        queryKey: ["user-profile"],
+                      });
+                    }}
+                    onUploadError={(error) => {
+                      console.error("Upload error:", error);
+                      alert(error);
+                    }}
                   />
-                ) : (
-                  <div className="size-20 rounded-full bg-muted flex items-center justify-center">
-                    <UserIcon className="size-10 text-muted-foreground" />
-                  </div>
-                )}
-                <div>
-                  <h3 className="text-lg font-semibold">
-                    {profile.name || "No name set"}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {profile.email}
-                  </p>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  {profile.image ? (
+                    <Image
+                      src={profile.image}
+                      alt={profile.name || "Profile"}
+                      width={80}
+                      height={80}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="size-20 rounded-full bg-muted flex items-center justify-center">
+                      <UserIcon className="size-10 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      {profile.name || "No name set"}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {profile.email}
+                    </p>
+                    {profile.username && (
+                      <p className="text-sm text-muted-foreground">
+                        @{profile.username}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {isEditing ? (
                 /* Edit Form */
@@ -216,22 +242,22 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="space-y-2">
-  <label htmlFor="username" className="text-sm font-medium">
-    Username
-  </label>
-  <Input
-    id="username"
-    type="text"
-    placeholder="Your unique username"
-    value={formData.username}
-    onChange={(e) =>
-      setFormData({ ...formData, username: e.target.value })
-    }
-  />
-  <p className="text-xs text-muted-foreground">
-    3-20 characters, letters, numbers, and underscores only
-  </p>
-</div>
+                    <label htmlFor="username" className="text-sm font-medium">
+                      Username
+                    </label>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Your unique username"
+                      value={formData.username}
+                      onChange={(e) =>
+                        setFormData({ ...formData, username: e.target.value })
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      3-20 characters, letters, numbers, and underscores only
+                    </p>
+                  </div>
                   <div className="space-y-2">
                     <label htmlFor="bio" className="text-sm font-medium">
                       Bio

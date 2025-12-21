@@ -19,6 +19,11 @@ const envSchema = z.object({
   
   // Groq (optional)
   GROQ_API_KEY: z.string().optional(),
+  
+  // Cloudinary (optional)
+  NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
 });
 
 // Validate environment variables
