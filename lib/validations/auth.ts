@@ -1,9 +1,18 @@
 import { z } from "zod";
 
+// Username validation helper
+const usernameSchema = z
+  .string()
+  .min(3, "Username must be at least 3 characters")
+  .max(20, "Username must be less than 20 characters")
+  .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores")
+  .transform(val => val.toLowerCase()); // Normalize to lowercase
+
 // Signup validation
 export const signupSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long").optional(),
   email: z.string().email("Invalid email address"),
+  username: usernameSchema,
   password: z
     .string()
     .min(6, "Password must be at least 6 characters")
@@ -19,6 +28,7 @@ export const signinSchema = z.object({
 // Profile update validation
 export const updateProfileSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long").optional(),
+  username: usernameSchema.optional(),
   bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
   location: z.string().max(100, "Location must be less than 100 characters").optional(),
 });

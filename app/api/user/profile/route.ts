@@ -5,6 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
 import { updateProfileSchema } from "@/lib/validations/auth";
+import { isUsernameAvailable } from "@/lib/username-generator";
 import { z } from "zod";
 
 // GET: Fetch user profile
@@ -27,6 +28,7 @@ export async function GET(req: Request) {
       id: user._id.toString(),
       name: user.name,
       email: user.email,
+      username: user.username,
       image: user.image,
       bio: user.bio,
       location: user.location,
@@ -56,13 +58,29 @@ export async function PUT(req: Request) {
 
     // Validate input with Zod
     const validatedData = updateProfileSchema.parse(body);
-    const { name, bio, location } = validatedData;
+    const { name, username, bio, location } = validatedData;
 
     await connectDB();
+
+    // Check if username is being changed and if it's available
+    if (username) {
+      const currentUser = await User.findById(session.user.id);
+      if (currentUser && currentUser.username !== username.toLowerCase()) {
+        const available = await isUsernameAvailable(username);
+        if (!available) {
+          return NextResponse.json(
+            { error: "Username is already taken" },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     const user = await User.findByIdAndUpdate(
       session.user.id,
       { 
         ...(name !== undefined && { name }),
+        ...(username !== undefined && { username: username.toLowerCase() }),
         ...(bio !== undefined && { bio }),
         ...(location !== undefined && { location }),
       },
@@ -77,6 +95,7 @@ export async function PUT(req: Request) {
       id: user._id.toString(),
       name: user.name,
       email: user.email,
+      username: user.username,
       image: user.image,
       bio: user.bio,
       location: user.location,

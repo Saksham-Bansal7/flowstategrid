@@ -6,6 +6,7 @@ interface UserProfile {
   id: string;
   name?: string;
   email: string;
+  username?: string;
   image?: string;
   bio?: string;
   location?: string;

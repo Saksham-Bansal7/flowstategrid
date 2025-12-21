@@ -6,6 +6,7 @@ import { Session } from '@/models/Session';
 import { VerificationToken } from '@/models/VerificationToken';
 import type { Adapter } from 'next-auth/adapters';
 import mongoose from 'mongoose';
+import { generateUniqueUsername } from './username-generator';
 
 export function MongoDBAdapter(): Adapter {
   return {
@@ -13,9 +14,19 @@ export function MongoDBAdapter(): Adapter {
 async createUser(user: IUser) {
   await connectDB();
   
+  // Generate unique username if not provided (OAuth signup)
+  let username = user.username;
+  if (!username && user.name) {
+    username = await generateUniqueUsername(user.name);
+  } else if (!username && user.email) {
+    // Fallback to email-based username
+    username = await generateUniqueUsername(user.email.split('@')[0]);
+  }
+  
   // Auto-verify if this is an OAuth signup (no password)
   const userData = {
     ...user,
+    username,
     emailVerified: user.password ? null : new Date(), // OAuth = auto-verified
   };
   
@@ -98,7 +109,7 @@ async createUser(user: IUser) {
       return newAccount.toObject();
     },
 
-    async unlinkAccount({ providerAccountId, provider }: { providerAccountId: string; provider: string }) {
+    async unlinkAccount({ providerAccountId, provider }:{providerAccountId : string , provider:string}) {
       await connectDB();
       await Account.findOneAndDelete({ provider, providerAccountId });
     },
@@ -106,11 +117,7 @@ async createUser(user: IUser) {
     async createSession({ sessionToken, userId, expires }) {
       await connectDB();
       const session = await Session.create({ sessionToken, userId, expires });
-      return {
-        sessionToken: session.sessionToken,
-        userId: session.userId.toString(),
-        expires: session.expires,
-      };
+      return session.toObject();
     },
 
     async getSessionAndUser(sessionToken) {
@@ -122,7 +129,7 @@ async createUser(user: IUser) {
       return {
         session: {
           sessionToken: session.sessionToken,
-          userId: (session.userId as mongoose.Types.ObjectId).toString(),
+          userId: session.userId,
           expires: session.expires,
         },
         user: {
@@ -145,7 +152,7 @@ async createUser(user: IUser) {
       if (!session) return null;
       return {
         sessionToken: session.sessionToken,
-        userId: (session.userId as mongoose.Types.ObjectId).toString(),
+        userId: session.userId,
         expires: session.expires,
       };
     },
@@ -155,18 +162,14 @@ async createUser(user: IUser) {
       await Session.findOneAndDelete({ sessionToken });
     },
 
-    async createVerificationToken({ identifier, expires, token }) {
+    async createVerificationToken({ identifier, token, expires }) {
       await connectDB();
       const verificationToken = await VerificationToken.create({
         identifier,
         token,
         expires,
       });
-      return {
-        identifier: verificationToken.identifier,
-        token: verificationToken.token,
-        expires: verificationToken.expires,
-      };
+      return verificationToken.toObject();
     },
 
     async useVerificationToken({ identifier, token }) {

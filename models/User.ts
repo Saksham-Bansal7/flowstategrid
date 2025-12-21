@@ -5,6 +5,7 @@ export interface IUser {
   _id: string;
   name?: string;
   email: string;
+  username?: string; // New field
   emailVerified?: Date | null;
   image?: string;
   password?: string;
@@ -20,6 +21,7 @@ const UserSchema = new Schema<IUser>(
   {
     name: { type: String },
     email: { type: String, required: true, unique: true },
+    username: { type: String, unique: true, sparse: true }, // sparse allows multiple null values
     emailVerified: { type: Date, default: null },
     image: { type: String },
     password: { type: String },

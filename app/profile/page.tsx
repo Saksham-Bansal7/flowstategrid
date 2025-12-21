@@ -2,13 +2,27 @@
 "use client";
 
 import { useUserProfile, useUpdateUserProfile } from "@/hooks/use-user-profile";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LocationPicker from "@/components/location-picker";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, User as UserIcon, MapPin, Mail, Calendar, Check, X } from "lucide-react";
+import {
+  Loader2,
+  User as UserIcon,
+  MapPin,
+  Mail,
+  Calendar,
+  Check,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
@@ -16,10 +30,11 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const { data: profile, isLoading, error } = useUserProfile();
   const updateProfile = useUpdateUserProfile();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    username: "",
     bio: "",
     location: "",
   });
@@ -36,6 +51,7 @@ export default function ProfilePage() {
     if (profile) {
       setFormData({
         name: profile.name || "",
+        username: profile.username || "",
         bio: profile.bio || "",
         location: profile.location || "",
       });
@@ -44,7 +60,7 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       await updateProfile.mutateAsync(formData);
       setIsEditing(false);
@@ -57,6 +73,7 @@ export default function ProfilePage() {
     if (profile) {
       setFormData({
         name: profile.name || "",
+        username: profile.username || "",
         bio: profile.bio || "",
         location: profile.location || "",
       });
@@ -118,40 +135,43 @@ export default function ProfilePage() {
                 )}
               </div>
             </CardHeader>
-{!profile.emailVerified && (
-  <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
-    <CardContent className="pt-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="font-medium">Email not verified</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Please check your inbox for a verification email.
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={async () => {
-            try {
-              const response = await fetch("/api/auth/resend-verification", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: profile.email }),
-              });
-              if (response.ok) {
-                alert("Verification email sent!");
-              }
-            } catch (error) {
-              alert("Failed to send email");
-            }
-          }}
-        >
-          Resend Email
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
-)}
+            {!profile.emailVerified && (
+              <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-medium">Email not verified</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Please check your inbox for a verification email.
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(
+                            "/api/auth/resend-verification",
+                            {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ email: profile.email }),
+                            }
+                          );
+                          if (response.ok) {
+                            alert("Verification email sent!");
+                          }
+                        } catch (error) {
+                          alert("Failed to send email");
+                        }
+                      }}
+                    >
+                      Resend Email
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             <CardContent className="space-y-6">
               {/* Profile Image */}
               <div className="flex items-center space-x-4">
@@ -172,7 +192,9 @@ export default function ProfilePage() {
                   <h3 className="text-lg font-semibold">
                     {profile.name || "No name set"}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{profile.email}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {profile.email}
+                  </p>
                 </div>
               </div>
 
@@ -193,7 +215,23 @@ export default function ProfilePage() {
                       }
                     />
                   </div>
-
+                  <div className="space-y-2">
+  <label htmlFor="username" className="text-sm font-medium">
+    Username
+  </label>
+  <Input
+    id="username"
+    type="text"
+    placeholder="Your unique username"
+    value={formData.username}
+    onChange={(e) =>
+      setFormData({ ...formData, username: e.target.value })
+    }
+  />
+  <p className="text-xs text-muted-foreground">
+    3-20 characters, letters, numbers, and underscores only
+  </p>
+</div>
                   <div className="space-y-2">
                     <label htmlFor="bio" className="text-sm font-medium">
                       Bio
@@ -214,22 +252,19 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-  <label htmlFor="location" className="text-sm font-medium">
-    Location
-  </label>
-  <LocationPicker
-    value={formData.location}
-    onChange={(value) =>
-      setFormData({ ...formData, location: value })
-    }
-  />
-</div>
+                    <label htmlFor="location" className="text-sm font-medium">
+                      Location
+                    </label>
+                    <LocationPicker
+                      value={formData.location}
+                      onChange={(value) =>
+                        setFormData({ ...formData, location: value })
+                      }
+                    />
+                  </div>
 
                   <div className="flex space-x-2">
-                    <Button
-                      type="submit"
-                      disabled={updateProfile.isPending}
-                    >
+                    <Button type="submit" disabled={updateProfile.isPending}>
                       {updateProfile.isPending ? (
                         <>
                           <Loader2 className="animate-spin" />
@@ -266,7 +301,9 @@ export default function ProfilePage() {
                     <Mail className="size-5 text-muted-foreground mt-0.5" />
                     <div>
                       <p className="text-sm font-medium">Email</p>
-                      <p className="text-sm text-muted-foreground">{profile.email}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {profile.email}
+                      </p>
                     </div>
                   </div>
 
@@ -275,7 +312,9 @@ export default function ProfilePage() {
                       <UserIcon className="size-5 text-muted-foreground mt-0.5" />
                       <div>
                         <p className="text-sm font-medium">Bio</p>
-                        <p className="text-sm text-muted-foreground">{profile.bio}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profile.bio}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -285,7 +324,9 @@ export default function ProfilePage() {
                       <MapPin className="size-5 text-muted-foreground mt-0.5" />
                       <div>
                         <p className="text-sm font-medium">Location</p>
-                        <p className="text-sm text-muted-foreground">{profile.location}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profile.location}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -295,11 +336,14 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm font-medium">Member Since</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(profile.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                        {new Date(profile.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
                       </p>
                     </div>
                   </div>

@@ -17,6 +17,7 @@ export default function SignUpPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    username: "",
     password: "",
     confirmPassword: "",
   });
@@ -57,6 +58,12 @@ export default function SignUpPage() {
       return;
     }
 
+    if (!formData.username || formData.username.length < 3) {
+      setError("Username must be at least 3 characters");
+      setLoading(false);
+      return;
+    }
+
     try {
       // Create user
       const response = await fetch("/api/auth/signup", {
@@ -67,6 +74,7 @@ export default function SignUpPage() {
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
+          username: formData.username,
           password: formData.password,
         }),
       });
@@ -197,6 +205,23 @@ export default function SignUpPage() {
                 value={formData.name}
                 onChange={handleChange}
               />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="username" className="text-sm font-medium">
+                Username
+              </label>
+              <Input
+                id="username"
+                name="username"
+                type="text"
+                placeholder="johndoe123"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                3-20 characters, letters, numbers, and underscores only
+              </p>
             </div>
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
