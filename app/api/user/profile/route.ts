@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/User";
+import { Post } from "@/models/Post"; // Add this import
 import { updateProfileSchema } from "@/lib/validations/auth";
 import { isUsernameAvailable } from "@/lib/username-generator";
 import { z } from "zod";
@@ -63,6 +64,7 @@ export async function PUT(req: Request) {
     await connectDB();
 
     // Check if username is being changed and if it's available
+    let usernameChanged = false;
     if (username) {
       const currentUser = await User.findById(session.user.id);
       if (currentUser && currentUser.username !== username.toLowerCase()) {
@@ -73,6 +75,7 @@ export async function PUT(req: Request) {
             { status: 400 }
           );
         }
+        usernameChanged = true;
       }
     }
 
@@ -89,6 +92,14 @@ export async function PUT(req: Request) {
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Update username in all user's posts if username changed
+    if (usernameChanged && username) {
+      await Post.updateMany(
+        { userId: session.user.id },
+        { $set: { username: username.toLowerCase() } }
+      );
     }
 
     return NextResponse.json({

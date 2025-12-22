@@ -1,4 +1,3 @@
-// app/query-provider.tsx
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -15,11 +14,10 @@ export default function QueryProvider({
       new QueryClient({
         defaultOptions: {
           queries: {
-            // With SSR, we usually want to set some default staleTime
-            // above 0 to avoid refetching immediately on the client
             staleTime: 60 * 1000, // 1 minute
-            refetchOnWindowFocus: false, // Don't refetch on window focus
-            retry: 1, // Retry failed requests once
+            gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
+            refetchOnWindowFocus: false,
+            retry: 1,
           },
         },
       })

@@ -33,6 +33,9 @@ export default function Navbar() {
             >
               Dashboard
             </Link>
+            <Link href="/feed" className="hover:text-primary transition-colors">
+              Feed
+            </Link>
             <Link
               href="/rooms"
               className="text-sm font-medium hover:text-primary transition-colors"
@@ -109,6 +112,13 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Dashboard
+            </Link>
+            <Link
+              href="/feed"
+              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Feed
             </Link>
             <Link
               href="/rooms"
