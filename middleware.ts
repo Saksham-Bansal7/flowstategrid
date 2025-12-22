@@ -10,7 +10,9 @@ export default withAuth(
     const isDashboard = req.nextUrl.pathname.startsWith("/dashboard");
     const isRooms = req.nextUrl.pathname.startsWith("/rooms");
     const isProfile = req.nextUrl.pathname.startsWith("/profile");
-    const isProtected = isDashboard || isRooms || isProfile;
+    const isFeed = req.nextUrl.pathname.startsWith("/feed");
+    
+    const isProtected = isDashboard || isRooms || isProfile || isFeed;
 
     console.log("🔒 Middleware running:", {
       path: req.nextUrl.pathname,
@@ -58,6 +60,7 @@ export const config = {
     "/dashboard/:path*",
     "/profile/:path*",
     "/rooms/:path*",
+    "/feed",// only /feed path is protected (not /feed/:id etc)
     
     // Auth routes (to redirect if already logged in)
     "/auth/signin",

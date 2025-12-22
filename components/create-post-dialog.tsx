@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCreatePost } from "@/hooks/use-posts";
 import { Loader2, X, Image as ImageIcon } from "lucide-react";
+import { useUserProfile } from "@/hooks/use-user-profile";
+
 
 interface CreatePostDialogProps {
   open: boolean;
@@ -26,10 +28,17 @@ export default function CreatePostDialog({
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const { data: profile } = useUserProfile();
   const createPost = useCreatePost();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // ✅ Check verification before submitting
+    if (!profile?.emailVerified) {
+      alert("Please verify your email before creating posts.");
+      return;
+    }
 
     if (!content.trim()) {
       alert("Please enter some content");

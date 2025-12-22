@@ -111,7 +111,7 @@ export async function GET(req: Request) {
   }
 }
 
-// POST: Create a new post (keep existing code)
+// POST: Create a new post
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -125,12 +125,20 @@ export async function POST(req: Request) {
 
     await connectDB();
 
-    // Get user's username
-    const user = await User.findById(session.user.id).select("username");
+    // Get user's username and check email verification
+    const user = await User.findById(session.user.id).select("username emailVerified");
     if (!user || !user.username) {
       return NextResponse.json(
         { error: "Username not found. Please set a username in your profile." },
         { status: 400 }
+      );
+    }
+
+    // ✅ Check email verification
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { error: "Please verify your email before creating posts." },
+        { status: 403 }
       );
     }
 

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/db";
 import { Post } from "@/models/Post";
+import { User } from "@/models/User";
 import { addReactionSchema } from "@/lib/validations/post";
 import { z } from "zod";
 
@@ -12,7 +13,7 @@ export async function POST(
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const { postId } = await params; // ✅ Await params
+    const { postId } = await params;
     
     const session = await getServerSession(authOptions);
 
@@ -20,10 +21,19 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    await connectDB();
+
+    // ✅ Check email verification
+    const user = await User.findById(session.user.id).select("emailVerified");
+    if (!user?.emailVerified) {
+      return NextResponse.json(
+        { error: "Please verify your email before reacting to posts." },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const validatedData = addReactionSchema.parse(body);
-
-    await connectDB();
 
     const post = await Post.findById(postId);
     if (!post) {

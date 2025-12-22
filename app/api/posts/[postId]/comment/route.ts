@@ -13,7 +13,7 @@ export async function POST(
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const { postId } = await params; // ✅ Await params
+    const { postId } = await params;
     
     const session = await getServerSession(authOptions);
 
@@ -25,6 +25,18 @@ export async function POST(
     const validatedData = addCommentSchema.parse(body);
 
     await connectDB();
+
+    // ✅ Check email verification
+    const user = await User.findById(session.user.id)
+      .select("_id name username image emailVerified")
+      .lean();
+      
+    if (!user?.emailVerified) {
+      return NextResponse.json(
+        { error: "Please verify your email before commenting on posts." },
+        { status: 403 }
+      );
+    }
 
     const post = await Post.findById(postId);
     if (!post) {
@@ -40,11 +52,6 @@ export async function POST(
     } as any);
 
     await post.save();
-
-    // Get user details for the new comment
-    const user = await User.findById(session.user.id)
-      .select("_id name username image")
-      .lean();
 
     const newComment = post.comments[post.comments.length - 1];
 

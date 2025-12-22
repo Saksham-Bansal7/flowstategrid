@@ -12,10 +12,13 @@ import PostCard from "@/components/post-card";
 import CreatePostDialog from "@/components/create-post-dialog";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import EmailVerificationAlert from "@/components/email-verification-alert";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
 export default function FeedPage() {
   // ✅ ALL HOOKS AT THE TOP - BEFORE ANY CONDITIONS
   const { data: session, status } = useSession();
+  const { data: profile } = useUserProfile();
   const searchParams = useSearchParams();
   const loadMoreRef = useRef<HTMLDivElement>(null);
   
@@ -108,6 +111,10 @@ export default function FeedPage() {
               New Post
             </Button>
           </div>
+          {/* ✅ Email Verification Alert */}
+          {profile && !profile.emailVerified && (
+            <EmailVerificationAlert email={profile.email} />
+          )}
 
           {/* Search Bar */}
           <Card>
