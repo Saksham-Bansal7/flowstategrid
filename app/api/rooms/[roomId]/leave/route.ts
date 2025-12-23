@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/db";
 import { Room } from "@/models/Room";
+import { FocusSession } from "@/models/FocusSession";
 
 export async function POST(
   req: Request,
@@ -23,6 +24,7 @@ export async function POST(
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
+    // Remove participant from room
     room.participants = room.participants.filter(
       (p: any) => p.userId !== session.user.id
     );
@@ -33,6 +35,26 @@ export async function POST(
     }
 
     await room.save();
+
+    // End the active focus session
+    const activeSession = await FocusSession.findOne({
+      userId: session.user.id,
+      roomId: roomId,
+      isActive: true,
+    });
+
+    if (activeSession) {
+      const endTime = new Date();
+      const duration = Math.floor(
+        (endTime.getTime() - activeSession.startTime.getTime()) / (1000 * 60)
+      ); // in minutes
+
+      activeSession.endTime = endTime;
+      activeSession.duration = duration;
+      activeSession.isActive = false;
+
+      await activeSession.save();
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

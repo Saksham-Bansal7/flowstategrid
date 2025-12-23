@@ -23,7 +23,6 @@ export default function Navbar() {
             href="/"
             className="flex items-center space-x-2 text-xl font-bold"
           >
-            <span className="text-2xl">🚀</span>
             <span>FlowStateGrid</span>
           </Link>
 
@@ -45,7 +44,7 @@ export default function Navbar() {
               href="/rooms"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
-              Study Rooms
+              Rooms
             </Link>
             {session && profile?.username && (
               <Link
@@ -140,7 +139,7 @@ export default function Navbar() {
               className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Study Rooms
+              Rooms
             </Link>
             {session && profile?.username && (
               <Link
