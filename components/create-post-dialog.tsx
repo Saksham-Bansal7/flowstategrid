@@ -13,8 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCreatePost } from "@/hooks/use-posts";
 import { Loader2, X, Image as ImageIcon } from "lucide-react";
-import { useUserProfile } from "@/hooks/use-user-profile";
-
 
 interface CreatePostDialogProps {
   open: boolean;
@@ -28,17 +26,11 @@ export default function CreatePostDialog({
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [images, setImages] = useState<string[]>([]);
-  const { data: profile } = useUserProfile();
+  const [uploading, setUploading] = useState(false);
   const createPost = useCreatePost();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // ✅ Check verification before submitting
-    if (!profile?.emailVerified) {
-      alert("Please verify your email before creating posts.");
-      return;
-    }
 
     if (!content.trim()) {
       alert("Please enter some content");
@@ -87,9 +79,12 @@ export default function CreatePostDialog({
     }
 
     // Upload to Cloudinary
+    setUploading(true);
     try {
       const base64 = await fileToBase64(file);
-      const response = await fetch("/api/user/upload-avatar", {
+      
+      // ✅ Use the POST IMAGE endpoint, not avatar endpoint
+      const response = await fetch("/api/posts/upload-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: base64 }),
@@ -103,6 +98,8 @@ export default function CreatePostDialog({
       }
     } catch (error) {
       alert("Failed to upload image");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -165,10 +162,10 @@ export default function CreatePostDialog({
                 variant="outline"
                 size="sm"
                 onClick={() => document.getElementById("post-image")?.click()}
-                disabled={images.length >= 4}
+                disabled={images.length >= 4 || uploading}
               >
                 <ImageIcon className="size-4" />
-                Add Image ({images.length}/4)
+                {uploading ? "Uploading..." : `Add Image (${images.length}/4)`}
               </Button>
               <input
                 id="post-image"
@@ -176,6 +173,7 @@ export default function CreatePostDialog({
                 accept="image/*"
                 onChange={handleImageUpload}
                 className="hidden"
+                disabled={uploading}
               />
             </div>
 
@@ -205,7 +203,7 @@ export default function CreatePostDialog({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={createPost.isPending}>
+            <Button type="submit" disabled={createPost.isPending || uploading}>
               {createPost.isPending ? (
                 <>
                   <Loader2 className="animate-spin" />

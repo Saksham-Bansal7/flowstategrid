@@ -1,4 +1,4 @@
-// app/profile/page.tsx
+// app/account/page.tsx
 "use client";
 
 import { useUserProfile, useUpdateUserProfile } from "@/hooks/use-user-profile";
@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LocationPicker from "@/components/location-picker";
 import { useState, useEffect, use } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import {
   Loader2,
   User as UserIcon,
@@ -25,8 +25,10 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { useDeleteAccount } from "@/hooks/use-user-profile";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -41,6 +43,18 @@ export default function ProfilePage() {
     bio: "",
     location: "",
   });
+  const deleteAccount = useDeleteAccount();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const router = useRouter();
+    const handleDeleteAccount = async () => {
+    try {
+      await deleteAccount.mutateAsync();
+      signOut({ callbackUrl: "/" });
+    } catch (error) {
+      alert("Failed to delete account");
+    }
+  };
+  
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -115,12 +129,10 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="space-y-6">
           {/* Header */}
-          <div>
-            <h1 className="text-4xl font-bold">Profile</h1>
-            <p className="text-muted-foreground mt-2">
-              Manage your account information
-            </p>
-          </div>
+          <h1 className="text-4xl font-bold">Account Settings</h1>
+          <p className="text-muted-foreground mt-2">
+            Manage your account information
+          </p>
 
           {/* Profile Card */}
           <Card>
@@ -401,9 +413,69 @@ export default function ProfilePage() {
                 </p>
               </CardContent>
             </Card>
+            
           </div>
+        {/* Delete Account Section */}
+          <Card className="border-destructive">
+            <CardHeader>
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+              <CardDescription>
+                Permanently delete your account and all associated data
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                Delete Account
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+<Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Are you absolutely sure?</DialogTitle>
+      <DialogDescription asChild>
+        <div className="space-y-2">
+          <p>This action cannot be undone. This will permanently delete your account and remove all your data from our servers, including:</p>
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            <li>Your profile information</li>
+            <li>All your posts</li>
+            <li>All your comments</li>
+            <li>All your reactions</li>
+          </ul>
+        </div>
+      </DialogDescription>
+    </DialogHeader>
+    <div className="flex gap-3 justify-end">
+      <Button
+        variant="outline"
+        onClick={() => setShowDeleteDialog(false)}
+      >
+        Cancel
+      </Button>
+      <Button
+        variant="destructive"
+        onClick={handleDeleteAccount}
+        disabled={deleteAccount.isPending}
+      >
+        {deleteAccount.isPending ? (
+          <>
+            <Loader2 className="animate-spin" />
+            Deleting...
+          </>
+        ) : (
+          "Yes, delete my account"
+        )}
+      </Button>
+    </div>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

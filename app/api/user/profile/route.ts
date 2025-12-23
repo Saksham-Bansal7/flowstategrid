@@ -8,6 +8,8 @@ import { Post } from "@/models/Post"; // Add this import
 import { updateProfileSchema } from "@/lib/validations/auth";
 import { isUsernameAvailable } from "@/lib/username-generator";
 import { z } from "zod";
+import { Session } from "@/models/Session";
+import { Account } from "@/models/Account";
 
 // GET: Fetch user profile
 export async function GET(req: Request) {
@@ -124,6 +126,54 @@ export async function PUT(req: Request) {
     console.error("Profile update error:", error);
     return NextResponse.json(
       { error: "Failed to update profile" },
+      { status: 500 }
+    );
+  }
+}
+
+// Add DELETE method at the end
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await connectDB();
+
+    // Delete all user's posts
+    await Post.deleteMany({ userId: session.user.id });
+
+    // Delete all user's comments from other posts
+    await Post.updateMany(
+      { "comments.userId": session.user.id },
+      { $pull: { comments: { userId: session.user.id } } }
+    );
+
+    // Delete all user's reactions from other posts
+    await Post.updateMany(
+      { "reactions.userId": session.user.id },
+      { $pull: { reactions: { userId: session.user.id } } }
+    );
+
+    // Delete user account
+    await User.findByIdAndDelete(session.user.id);
+
+    // Delete all sessions
+    await Session.deleteMany({ userId: session.user.id });
+
+    // Delete all accounts (OAuth connections)
+    await Account.deleteMany({ userId: session.user.id });
+
+    return NextResponse.json({
+      message: "Account deleted successfully",
+    });
+  } catch (error) {
+    console.error("Account deletion error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete account" },
       { status: 500 }
     );
   }

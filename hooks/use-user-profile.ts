@@ -1,6 +1,7 @@
 // hooks/use-user-profile.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface UserProfile {
   id: string;
@@ -63,6 +64,28 @@ export function useUpdateUserProfile() {
       queryClient.invalidateQueries({ 
         queryKey: ["user-profile", session?.user?.id] 
       });
+    },
+  });
+}
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/user/profile", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to delete account");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.clear(); // Clear all cache
     },
   });
 }

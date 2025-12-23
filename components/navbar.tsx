@@ -4,12 +4,14 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, User, Menu, X, Github, Mail } from "lucide-react";
+import { LogIn, LogOut, User, Menu, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import { useUserProfile } from "@/hooks/use-user-profile";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
+  const { data: profile } = useUserProfile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -33,7 +35,10 @@ export default function Navbar() {
             >
               Dashboard
             </Link>
-            <Link href="/feed" className="hover:text-primary transition-colors">
+            <Link
+              href="/feed"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
               Feed
             </Link>
             <Link
@@ -42,12 +47,22 @@ export default function Navbar() {
             >
               Study Rooms
             </Link>
-            <Link
-              href="/profile"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Profile
-            </Link>
+            {session && profile?.username && (
+              <Link
+                href={`/u/${profile.username}`}
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                Profile
+              </Link>
+            )}
+            {session && (
+              <Link
+                href="/account"
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                Account
+              </Link>
+            )}
           </div>
 
           {/* Desktop Auth Buttons */}
@@ -127,13 +142,24 @@ export default function Navbar() {
             >
               Study Rooms
             </Link>
-            <Link
-              href="/profile"
-              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Profile
-            </Link>
+            {session && profile?.username && (
+              <Link
+                href={`/u/${profile.username}`}
+                className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Profile
+              </Link>
+            )}
+            {session && (
+              <Link
+                href="/account"
+                className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Account
+              </Link>
+            )}
 
             <div className="pt-3 border-t space-y-2">
               {status === "loading" ? (
