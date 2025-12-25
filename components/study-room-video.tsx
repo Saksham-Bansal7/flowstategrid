@@ -9,12 +9,14 @@ import AgoraRTC, {
 } from "agora-rtc-sdk-ng";
 import { Button } from "@/components/ui/button";
 import { Video, VideoOff, LogOut } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 interface StudyRoomVideoProps {
   channelName: string;
   onLeave: () => void;
   participants: Array<{ userId: string; userName: string }>;
   currentUserId: string;
+  currentUserName: string;
 }
 
 export default function StudyRoomVideo({
@@ -22,17 +24,20 @@ export default function StudyRoomVideo({
   onLeave,
   participants,
   currentUserId,
+  currentUserName,
 }: StudyRoomVideoProps) {
+  const { data: session, status } = useSession();
   const [localVideoTrack, setLocalVideoTrack] =
     useState<ICameraVideoTrack | null>(null);
   const [remoteUsers, setRemoteUsers] = useState<
-    Map<number, IRemoteVideoTrack>
+    Map<number, { track: IRemoteVideoTrack; userName: string }>
   >(new Map());
   const [isVideoOn, setIsVideoOn] = useState(true);
   const localVideoRef = useRef<HTMLDivElement>(null);
   const hasInitialized = useRef(false);
   const clientRef = useRef<IAgoraRTCClient | null>(null);
   const videoTrackRef = useRef<ICameraVideoTrack | null>(null);
+  const remoteUserCountRef = useRef(0);
 
   useEffect(() => {
     if (!hasInitialized.current) {
@@ -69,11 +74,25 @@ export default function StudyRoomVideo({
 
         if (mediaType === "video") {
           const remoteVideoTrack = user.videoTrack!;
+          
+          // Get the next participant who is not the current user
+          const otherParticipants = participants.filter(
+            (p) => p.userId !== currentUserId
+          );
+          
+          const participantIndex = remoteUserCountRef.current;
+          const participant = otherParticipants[participantIndex] || { userName: `User ${user.uid}` };
+          
           setRemoteUsers((prev) => {
             const newMap = new Map(prev);
-            newMap.set(user.uid as number, remoteVideoTrack);
+            newMap.set(user.uid as number, {
+              track: remoteVideoTrack,
+              userName: participant.userName,
+            });
             return newMap;
           });
+          
+          remoteUserCountRef.current++;
         }
       });
 
@@ -83,6 +102,7 @@ export default function StudyRoomVideo({
           newMap.delete(user.uid as number);
           return newMap;
         });
+        remoteUserCountRef.current = Math.max(0, remoteUserCountRef.current - 1);
       });
 
       // Join channel
@@ -125,6 +145,7 @@ export default function StudyRoomVideo({
         clientRef.current = null;
       }
       setRemoteUsers(new Map());
+      remoteUserCountRef.current = 0;
     } catch (error) {
       console.error("Cleanup error:", error);
     }
@@ -137,10 +158,10 @@ export default function StudyRoomVideo({
 
   useEffect(() => {
     // Render remote videos
-    remoteUsers.forEach((track, uid) => {
+    remoteUsers.forEach((user, uid) => {
       const container = document.getElementById(`remote-${uid}`);
       if (container && !container.hasChildNodes()) {
-        track.play(container);
+        user.track.play(container);
       }
     });
   }, [remoteUsers]);
@@ -151,31 +172,23 @@ export default function StudyRoomVideo({
       <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
         <div ref={localVideoRef} className="w-full h-full" />
         <div className="absolute bottom-4 left-4 bg-black/50 px-3 py-1 rounded-full text-sm text-white">
-          You
+          {currentUserName} (You)
         </div>
       </div>
 
       {/* Remote Videos Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {Array.from(remoteUsers.entries()).map(([uid]) => {
-          const otherParticipants = participants.filter(
-            (p) => p.userId !== currentUserId
-          );
-          const index = Array.from(remoteUsers.keys()).indexOf(uid);
-          const participant = otherParticipants[index];
-
-          return (
-            <div
-              key={uid}
-              className="relative bg-black rounded-lg overflow-hidden aspect-video"
-            >
-              <div id={`remote-${uid}`} className="w-full h-full" />
-              <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded-full text-xs text-white">
-                {participant?.userName || `User ${uid}`}
-              </div>
+        {Array.from(remoteUsers.entries()).map(([uid, user]) => (
+          <div
+            key={uid}
+            className="relative bg-black rounded-lg overflow-hidden aspect-video"
+          >
+            <div id={`remote-${uid}`} className="w-full h-full" />
+            <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded-full text-xs text-white">
+              {session?.user?.name || user.userName}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
       {/* Controls */}

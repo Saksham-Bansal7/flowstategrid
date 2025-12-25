@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/db";
 import { Room } from "@/models/Room";
+import { User } from "@/models/User"; // Add this import
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
@@ -21,12 +22,17 @@ export async function POST(req: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (!session.user.emailVerified) {
-          return NextResponse.json(
-            { error: "Please verify your email before creating rooms." },
-            { status: 403 }
-          );
-        }
+
+    await connectDB();
+
+    // Check if email is verified by fetching from database
+    const user = await User.findById(session.user.id);
+    if (!user?.emailVerified) {
+      return NextResponse.json(
+        { error: "Please verify your email before creating rooms." },
+        { status: 403 }
+      );
+    }
 
     const body = await req.json();
     const data = createRoomSchema.parse(body);
@@ -40,8 +46,6 @@ export async function POST(req: Request) {
         );
       }
     }
-
-    await connectDB();
 
     // Hash password if private
     const hashedPassword = data.password && data.password.trim()

@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/db";
 import { Room } from "@/models/Room";
 import { User } from "@/models/User";
 import { FocusSession } from "@/models/FocusSession";
+import bcrypt from "bcryptjs";
 
 export async function POST(
   req: Request,
@@ -21,7 +22,7 @@ export async function POST(
     const user = await User.findById(session.user.id);
     if (!user?.emailVerified) {
       return NextResponse.json(
-        { error: "Please verify your email before joining rooms" },
+        { error: `Please verify your email before joining room, ${user?.emailVerified}` },
         { status: 403 }
       );
     }
@@ -43,7 +44,17 @@ export async function POST(
 
     // Check password for private rooms
     if (!room.isPublic) {
-      if (!password || password !== room.password) {
+      if (!password) {
+        return NextResponse.json(
+          { error: "Password is required for private rooms" },
+          { status: 403 }
+        );
+      }
+      
+      // Compare hashed password
+      const isPasswordValid = await bcrypt.compare(password, room.password || '');
+      
+      if (!isPasswordValid) {
         return NextResponse.json(
           { error: "Invalid password" },
           { status: 403 }
@@ -89,7 +100,14 @@ export async function POST(
       isActive: true,
     });
 
-    return NextResponse.json({ success: true, room });
+    return NextResponse.json({ 
+      success: true, 
+      room: {
+        id: room._id.toString(),
+        name: room.name,
+        participants: room.participants,
+      }
+    });
   } catch (error) {
     console.error("Join room error:", error);
     return NextResponse.json(

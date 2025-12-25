@@ -11,8 +11,10 @@ export default withAuth(
     const isRooms = req.nextUrl.pathname.startsWith("/rooms");
     const isProfile = req.nextUrl.pathname.startsWith("/profile");
     const isFeed = req.nextUrl.pathname.startsWith("/feed");
+    const isAccount = req.nextUrl.pathname.startsWith("/account");
+    const isStudyAssistant = req.nextUrl.pathname.startsWith("/rag");
     
-    const isProtected = isDashboard || isRooms || isProfile || isFeed;
+    const isProtected = isDashboard || isRooms || isProfile || isFeed || isAccount || isStudyAssistant;
 
     console.log("🔒 Middleware running:", {
       path: req.nextUrl.pathname,
@@ -61,6 +63,8 @@ export const config = {
     "/profile/:path*",
     "/rooms/:path*",
     "/feed",// only /feed path is protected (not /feed/:id etc)
+    "/account/:path*",
+    "/rag/:path*",
     
     // Auth routes (to redirect if already logged in)
     "/auth/signin",

@@ -4,7 +4,7 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, User, Menu, X } from "lucide-react";
+import { LogIn, LogOut, User, Menu, X, Sparkles } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import { useUserProfile } from "@/hooks/use-user-profile";
@@ -45,6 +45,12 @@ export default function Navbar() {
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Rooms
+            </Link>
+            <Link
+              href="/rag"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Study Assistant
             </Link>
             {session && profile?.username && (
               <Link
@@ -140,6 +146,13 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Rooms
+            </Link>
+            <Link
+              href="/rag"
+              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Study Assistant
             </Link>
             {session && profile?.username && (
               <Link
