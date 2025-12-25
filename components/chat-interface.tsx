@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send, Loader2, MessageCircle, Sparkles, Plus } from "lucide-react";
-import { useSendMessage, useChatSessions } from "@/hooks/use-documents";
+import { useSendMessage, useChatSessions, useDeleteChatSession } from "@/hooks/use-documents";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -38,6 +38,8 @@ export function ChatInterface({
 
   const sendMessageMutation = useSendMessage();
   const { data: sessionsData } = useChatSessions(documentId);
+  const deleteChatSessionMutation = useDeleteChatSession();
+  
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -106,10 +108,17 @@ export function ChatInterface({
     }
   };
 
-  const startNewChat = () => {
-    setMessages([]);
-    setSessionId(undefined);
-  };
+  const startNewChat = async () => {
+  if (sessionId) {
+    try {
+      await deleteChatSessionMutation.mutateAsync(sessionId);
+    } catch (error) {
+      console.error("Error deleting session:", error);
+    }
+  }
+  setMessages([]);
+  setSessionId(undefined);
+};
 
   if (!documentId) {
     return (

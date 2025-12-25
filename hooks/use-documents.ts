@@ -143,3 +143,23 @@ export function useChatSessions(documentId: string | null) {
     enabled: !!documentId,
   });
 }
+export function useDeleteChatSession() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (sessionId: string) => {
+      const response = await fetch(`/api/chat/sessions/${sessionId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete chat session");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
+    },
+  });
+}
