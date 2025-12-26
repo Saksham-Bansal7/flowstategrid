@@ -34,7 +34,7 @@ export async function POST(req: Request) {
           path: 'embedding',
           queryVector: queryEmbedding,
           numCandidates: 100,
-          limit: 5,
+          limit: 6, // Reduced from 5 to 3
           filter: {
             documentId: documentId,
           },
@@ -51,12 +51,24 @@ export async function POST(req: Request) {
       },
     ]);
 
-    // Build context from retrieved chunks
+    // Build context from retrieved chunks - LIMIT CHUNK SIZE
     const context = relevantChunks
-      .map((chunk, idx) => `[Source ${idx + 1}]:\n${chunk.content}`)
+      .map((chunk, idx) => {
+        // Truncate each chunk to max 400 characters to avoid payload too large
+        const truncatedContent = chunk.content.length > 400 
+          ? chunk.content.substring(0, 400) + '...'
+          : chunk.content;
+        return `[Source ${idx + 1}]:\n${truncatedContent}`;
+      })
       .join('\n\n---\n\n');
 
-    // Generate response with Groq - FIXED PROMPT
+    // Check total context length and truncate if needed
+    const maxContextLength = 3000; // ~3000 characters max
+    const finalContext = context.length > maxContextLength
+      ? context.substring(0, maxContextLength) + '\n\n[Context truncated due to length...]'
+      : context;
+
+    // Generate response with Groq
     const response = await groqClient.post('/chat/completions', {
       model: 'llama-3.3-70b-versatile',
       messages: [
@@ -66,11 +78,11 @@ export async function POST(req: Request) {
         },
         {
           role: 'user',
-          content: `Context from document:\n${context}\n\nQuestion: ${question}`
+          content: `Context from document:\n${finalContext}\n\nQuestion: ${question}`
         }
       ],
       temperature: 0.3,
-      max_tokens: 2048,
+      max_tokens: 1024, // Reduced from 2048
     });
 
     const answer = response.data.choices[0]?.message?.content || 'No response generated';

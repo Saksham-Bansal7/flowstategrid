@@ -95,7 +95,7 @@ export async function POST(req: Request) {
       // Clean and chunk text
       console.log('Chunking text...');
       const cleanedText = cleanText(extractedText);
-      const chunks = chunkText(cleanedText, 512, 50);
+      const chunks = chunkText(cleanedText, 700, 70);
       console.log('Created', chunks.length, 'chunks');
 
       if (chunks.length === 0) {
