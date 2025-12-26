@@ -23,6 +23,12 @@ export async function POST(req: Request) {
 
     await connectDB();
 
+    // Load existing chat session if sessionId is provided
+    let existingSession = null;
+    if (sessionId) {
+      existingSession = await ChatSession.findById(sessionId);
+    }
+
     // Generate embedding for the question
     const queryEmbedding = await generateEmbedding(question);
 
@@ -34,7 +40,7 @@ export async function POST(req: Request) {
           path: 'embedding',
           queryVector: queryEmbedding,
           numCandidates: 100,
-          limit: 6, // Reduced from 5 to 3
+          limit: 3,
           filter: {
             documentId: documentId,
           },
@@ -51,10 +57,9 @@ export async function POST(req: Request) {
       },
     ]);
 
-    // Build context from retrieved chunks - LIMIT CHUNK SIZE
+    // Build context from retrieved chunks
     const context = relevantChunks
       .map((chunk, idx) => {
-        // Truncate each chunk to max 400 characters to avoid payload too large
         const truncatedContent = chunk.content.length > 400 
           ? chunk.content.substring(0, 400) + '...'
           : chunk.content;
@@ -62,27 +67,46 @@ export async function POST(req: Request) {
       })
       .join('\n\n---\n\n');
 
-    // Check total context length and truncate if needed
-    const maxContextLength = 3000; // ~3000 characters max
+    const maxContextLength = 2000;
     const finalContext = context.length > maxContextLength
-      ? context.substring(0, maxContextLength) + '\n\n[Context truncated due to length...]'
+      ? context.substring(0, maxContextLength) + '\n\n[Context truncated...]'
       : context;
+
+    // Build messages array with conversation history
+    const messages: Array<{ role: string; content: string }> = [
+      {
+        role: 'system',
+        content: 'You are a helpful study assistant. Answer questions based on the provided context from the user\'s notes/question papers AND the conversation history. Provide clear, well-formatted answers using markdown. Use bullet points, numbered lists for better readability. If the context contains mathematical formulas, format them using LaTeX notation (wrap in $ for inline or $$ for block). Cite which source you\'re referencing. If you need to refer to previous parts of the conversation, do so naturally.'
+      },
+      {
+        role: 'user',
+        content: `Context from document:\n${finalContext}`
+      },
+    ];
+
+    // Add conversation history (limit to last 6 messages to avoid payload issues)
+    if (existingSession && existingSession.messages.length > 0) {
+      const recentMessages = existingSession.messages.slice(-6);
+      for (const msg of recentMessages) {
+        messages.push({
+          role: msg.role,
+          content: msg.content,
+        });
+      }
+    }
+
+    // Add current question
+    messages.push({
+      role: 'user',
+      content: question,
+    });
 
     // Generate response with Groq
     const response = await groqClient.post('/chat/completions', {
       model: 'llama-3.3-70b-versatile',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful study assistant. Answer questions based ONLY on the provided context from the user\'s notes/question papers. Provide clear, well-formatted answers using markdown. Use bullet points, numbered lists for better readability. If the context contains mathematical formulas, format them using LaTeX notation (wrap in $ for inline or $$ for block). Cite which source you\'re referencing. If the question cannot be answered from the context, clearly state "I cannot find this information in the provided document."'
-        },
-        {
-          role: 'user',
-          content: `Context from document:\n${finalContext}\n\nQuestion: ${question}`
-        }
-      ],
+      messages,
       temperature: 0.3,
-      max_tokens: 1024, // Reduced from 2048
+      max_tokens: 1024,
     });
 
     const answer = response.data.choices[0]?.message?.content || 'No response generated';
