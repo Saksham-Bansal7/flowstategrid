@@ -7,7 +7,15 @@ import { useInfinitePosts } from "@/hooks/use-posts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, TrendingUp, Clock, ThumbsUp, Search, X } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  TrendingUp,
+  Clock,
+  ThumbsUp,
+  Search,
+  X,
+} from "lucide-react";
 import PostCard from "@/components/post-card";
 import CreatePostDialog from "@/components/create-post-dialog";
 import { useSession } from "next-auth/react";
@@ -21,12 +29,14 @@ export default function FeedPage() {
   const { data: profile } = useUserProfile();
   const searchParams = useSearchParams();
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  
-  const [sortBy, setSortBy] = useState<"newest" | "mostLiked" | "trending">("newest");
+
+  const [sortBy, setSortBy] = useState<"newest" | "mostLiked" | "trending">(
+    "newest"
+  );
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const {
     data,
     isLoading,
@@ -96,98 +106,77 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background to-muted">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+        <div className="space-y-4 sm:space-y-6">
+          {/* Header - Stack on mobile */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold">Study Feed</h1>
-              <p className="text-muted-foreground mt-2">
-                Share and discover study content
+              <h1 className="text-2xl sm:text-3xl font-bold">Feed</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Share and discover study resources
               </p>
             </div>
-            <Button onClick={() => setShowCreatePost(true)}>
-              <Plus />
-              New Post
+            <Button
+              onClick={() => setShowCreatePost(true)}
+              size="default"
+              className="w-full sm:w-auto"
+            >
+              <Plus className="size-4 mr-2" />
+              Create Post
             </Button>
           </div>
-          {/* ✅ Email Verification Alert */}
-          {profile && !profile.emailVerified && (
-            <EmailVerificationAlert email={profile.email} />
-          )}
 
-          {/* Search Bar */}
-          <Card>
-            <CardContent className="pt-6">
-              <form onSubmit={handleSearch} className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by hashtag (e.g., study, mathematics)..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="pl-10 pr-10"
-                  />
-                  {searchInput && (
-                    <button
-                      type="button"
-                      onClick={clearSearch}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      <X className="size-4 text-muted-foreground hover:text-foreground" />
-                    </button>
-                  )}
-                </div>
-                <Button type="submit">Search</Button>
-              </form>
-              {searchQuery && (
-                <div className="mt-3 flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">Searching for:</span>
-                  <span className="px-2 py-1 bg-primary/10 text-primary rounded-md">
-                    #{searchQuery}
-                  </span>
-                  <button
-                    onClick={clearSearch}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    Clear
-                  </button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {/* Search Bar - Full width on mobile */}
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search posts..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10 pr-10 w-full"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            )}
+          </form>
 
-          {/* Filter Tabs */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex gap-2">
-                <Button
-                  variant={sortBy === "newest" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSortBy("newest")}
-                >
-                  <Clock className="size-4" />
-                  Newest
-                </Button>
-                <Button
-                  variant={sortBy === "mostLiked" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSortBy("mostLiked")}
-                >
-                  <ThumbsUp className="size-4" />
-                  Most Liked
-                </Button>
-                <Button
-                  variant={sortBy === "trending" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSortBy("trending")}
-                >
-                  <TrendingUp className="size-4" />
-                  Trending Today
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Sort Buttons - Horizontal scroll on mobile */}
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <Button
+              variant={sortBy === "newest" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSortBy("newest")}
+              className="shrink-0"
+            >
+              <Clock className="size-4 mr-2" />
+              Newest
+            </Button>
+            <Button
+              variant={sortBy === "mostLiked" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSortBy("mostLiked")}
+              className="shrink-0"
+            >
+              <ThumbsUp className="size-4 mr-2" />
+              Most Liked
+            </Button>
+            <Button
+              variant={sortBy === "trending" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSortBy("trending")}
+              className="shrink-0"
+            >
+              <TrendingUp className="size-4 mr-2" />
+              Trending
+            </Button>
+          </div>
 
           {/* Posts Feed */}
           {isLoading ? (
