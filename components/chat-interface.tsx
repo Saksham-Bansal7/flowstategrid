@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send, Loader2, MessageCircle, Sparkles, Plus } from "lucide-react";
@@ -27,10 +26,7 @@ interface ChatInterfaceProps {
   documentTitle?: string;
 }
 
-export function ChatInterface({
-  documentId,
-  documentTitle,
-}: ChatInterfaceProps) {
+export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState<string | undefined>();
@@ -39,7 +35,6 @@ export function ChatInterface({
   const sendMessageMutation = useSendMessage();
   const { data: sessionsData } = useChatSessions(documentId);
   const deleteChatSessionMutation = useDeleteChatSession();
-  
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -49,7 +44,6 @@ export function ChatInterface({
     scrollToBottom();
   }, [messages]);
 
-  // Load the most recent session when document changes
   useEffect(() => {
     if (sessionsData?.sessions && sessionsData.sessions.length > 0) {
       const latestSession = sessionsData.sessions[0];
@@ -64,11 +58,7 @@ export function ChatInterface({
   const handleSend = async () => {
     if (!input.trim() || !documentId) return;
 
-    const userMessage: Message = {
-      role: "user",
-      content: input.trim(),
-    };
-
+    const userMessage: Message = { role: "user", content: input.trim() };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
@@ -83,173 +73,130 @@ export function ChatInterface({
         setSessionId(response.sessionId);
       }
 
-      const assistantMessage: Message = {
+      setMessages((prev) => [...prev, {
         role: "assistant",
         content: response.answer,
         sources: response.sources,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
+      }]);
     } catch (error) {
       console.error("Send message error:", error);
-      const errorMessage: Message = {
+      setMessages((prev) => [...prev, {
         role: "assistant",
-        content:
-          "Sorry, I encountered an error processing your question. Please try again.",
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+        content: "Sorry, I encountered an error. Please try again.",
+      }]);
     }
   };
 
   const startNewChat = async () => {
-  if (sessionId) {
-    try {
-      await deleteChatSessionMutation.mutateAsync(sessionId);
-    } catch (error) {
-      console.error("Error deleting session:", error);
+    if (sessionId) {
+      try {
+        await deleteChatSessionMutation.mutateAsync(sessionId);
+      } catch (error) {
+        console.error("Error deleting session:", error);
+      }
     }
-  }
-  setMessages([]);
-  setSessionId(undefined);
-};
+    setMessages([]);
+    setSessionId(undefined);
+  };
 
   if (!documentId) {
     return (
-      <Card className="w-full">
-        <CardContent className="text-center space-y-3 py-12">
-          <MessageCircle className="size-16 text-muted-foreground mx-auto" />
-          <div>
-            <h3 className="text-lg font-semibold">No Document Selected</h3>
-            <p className="text-sm text-muted-foreground">
-              Upload or select a document to start chatting
-            </p>
+      <div className="relative h-full rounded-lg border bg-card">
+        <div className="absolute inset-0 flex items-center justify-center p-8">
+          <div className="text-center space-y-4">
+            <MessageCircle className="size-16 text-muted-foreground mx-auto" />
+            <div>
+              <h3 className="text-lg font-semibold">No Document Selected</h3>
+              <p className="text-sm text-muted-foreground mt-2">Upload or select a document to start chatting</p>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden">
-      <CardHeader className="border-b shrink-0 py-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Sparkles className="size-5 text-primary" />
-            Chat with {documentTitle || "Document"}
-          </CardTitle>
-          {messages.length > 0 && (
-            <Button variant="outline" size="sm" onClick={startNewChat}>
-              <Plus className="size-4 mr-2" />
-              New Chat
-            </Button>
-          )}
+    <div className="relative h-full rounded-lg border bg-card">
+      {/* Header - Absolute positioned */}
+      <div className="absolute top-0 left-0 right-0 h-14 flex items-center justify-between px-4 border-b bg-muted/50 z-10">
+        <div className="flex items-center gap-2">
+          <Sparkles className="size-5 text-primary" />
+          <h3 className="font-semibold text-sm truncate">{documentTitle || "Document"}</h3>
         </div>
-      </CardHeader>
+        {messages.length > 0 && (
+          <Button variant="outline" size="sm" onClick={startNewChat}>
+            <Plus className="size-4 mr-1" />
+            New
+          </Button>
+        )}
+      </div>
 
-      <CardContent className="flex-1 min-h-0 overflow-y-auto p-3">
+      {/* Messages - Absolute positioned with top and bottom offsets */}
+      <div className="absolute top-14 bottom-20 left-0 right-0 overflow-y-auto p-4">
         {messages.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-center">
-            <div className="space-y-2">
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center space-y-3 max-w-md">
               <Sparkles className="size-12 text-primary mx-auto" />
               <h3 className="font-semibold">Start a Conversation</h3>
-              <p className="text-sm text-muted-foreground max-w-sm">
-                Ask questions about your document. I'll search through the
-                content and provide accurate answers with sources.
-              </p>
+              <p className="text-sm text-muted-foreground">Ask questions about your document.</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-lg p-4 ${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  }`}
-                >
+              <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[85%] rounded-lg px-4 py-3 ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
                   {message.role === "assistant" ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeKatex]}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
+                    <>
+                      <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                          {message.content}
+                        </ReactMarkdown>
+                      </div>
                       {message.sources && message.sources.length > 0 && (
-                        <div className="mt-4 pt-4 border-t text-xs space-y-2">
-                          <p className="font-semibold text-muted-foreground">
-                            Sources:
-                          </p>
+                        <div className="mt-3 pt-3 border-t space-y-2">
+                          <p className="text-xs font-semibold">Sources:</p>
                           {message.sources.map((source, idx) => (
-                            <div
-                              key={idx}
-                              className="bg-background/50 p-2 rounded text-muted-foreground"
-                            >
-                              <p className="font-mono text-xs">
-                                Chunk {source.chunkIndex} (Relevance:{" "}
-                                {(source.score * 100).toFixed(1)}%)
-                              </p>
-                              <p className="text-xs mt-1 line-clamp-2">
-                                {source.content}
-                              </p>
+                            <div key={idx} className="bg-background/50 rounded p-2 text-xs">
+                              <p className="font-mono">Chunk {source.chunkIndex} ({(source.score * 100).toFixed(1)}%)</p>
                             </div>
                           ))}
                         </div>
                       )}
-                    </div>
+                    </>
                   ) : (
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-sm">{message.content}</p>
                   )}
                 </div>
               </div>
             ))}
             {sendMessageMutation.isPending && (
               <div className="flex justify-start">
-                <div className="bg-muted rounded-lg p-4">
-                  <Loader2 className="size-5 animate-spin text-primary" />
+                <div className="bg-muted rounded-lg px-4 py-3">
+                  <Loader2 className="size-5 animate-spin" />
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
         )}
-      </CardContent>
+      </div>
 
-      <div className="border-t p-3 shrink-0">
+      {/* Input - Absolute positioned at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 border-t p-4 bg-card">
         <div className="flex gap-2">
           <Input
-            placeholder="Ask a question about this document..."
+            placeholder="Ask a question..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
             disabled={sendMessageMutation.isPending}
           />
-          <Button
-            onClick={handleSend}
-            disabled={!input.trim() || sendMessageMutation.isPending}
-          >
-            {sendMessageMutation.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
+          <Button onClick={handleSend} disabled={!input.trim() || sendMessageMutation.isPending} size="icon">
+            {sendMessageMutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
           </Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

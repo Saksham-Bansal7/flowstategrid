@@ -23,13 +23,13 @@ export default function RAGPage() {
   const selectedDoc = documents?.find((d) => d.id === selectedDocId);
 
   return (
-    <div className="fixed inset-0 top-16 bg-linear-to-br from-background via-background to-muted">
-      <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="h-full grid grid-rows-[auto_1fr] gap-4">
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <div>
-              <h1 className="text-2xl font-bold bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                 Study Assistant
               </h1>
               <p className="text-muted-foreground text-sm">
@@ -40,22 +40,22 @@ export default function RAGPage() {
           </div>
 
           {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-hidden">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-hidden min-h-0">
             {/* Left: Document List */}
-            <div className="lg:col-span-1 grid grid-rows-[auto_1fr] gap-3 overflow-hidden">
-              <div className="flex items-center gap-2">
+            <div className="lg:col-span-1 flex flex-col gap-3 overflow-hidden">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <FileText className="size-4 text-primary" />
                 <h2 className="text-lg font-semibold">Your Documents</h2>
               </div>
 
               {isLoading ? (
-                <div className="space-y-3 overflow-y-auto">
+                <div className="space-y-3 overflow-y-auto flex-1">
                   {[1, 2, 3].map((i) => (
                     <Skeleton key={i} className="h-40" />
                   ))}
                 </div>
               ) : documents && documents.length > 0 ? (
-                <div className="space-y-3 overflow-y-auto pr-2">
+                <div className="space-y-3 overflow-y-auto flex-1 pr-2">
                   {documents.map((doc) => (
                     <DocumentCard
                       key={doc.id}
@@ -66,24 +66,24 @@ export default function RAGPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 border rounded-lg">
-                  <FileText className="size-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No documents yet</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Upload your first document to get started
-                  </p>
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center py-12 border rounded-lg px-4">
+                    <FileText className="size-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No documents yet</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Upload your first document to get started
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Right: Chat Interface */}
-            <div className="lg:col-span-2 overflow-hidden">
-              <div className="h-full">
-                <ChatInterface
-                  documentId={selectedDocId}
-                  documentTitle={selectedDoc?.title}
-                />
-              </div>
+            <div className="lg:col-span-2 flex flex-col overflow-hidden min-h-0">
+              <ChatInterface
+                documentId={selectedDocId}
+                documentTitle={selectedDoc?.title}
+              />
             </div>
           </div>
         </div>

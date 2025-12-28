@@ -31,6 +31,7 @@
     "agora-token": "^2.0.5",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
+    "canvas": "^3.2.0",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
@@ -42,7 +43,9 @@
     "next": "16.0.10",
     "next-auth": "^4.24.13",
     "next-cloudinary": "^6.17.5",
+    "node-tesseract-ocr": "^2.2.1",
     "pdf-parse-fork": "^1.2.0",
+    "pdfjs-dist": "^5.4.449",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-markdown": "^9.1.0",
@@ -50,7 +53,6 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "tailwind-merge": "^3.4.0",
-    "tesseract.js": "^7.0.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
