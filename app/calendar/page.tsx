@@ -278,7 +278,7 @@ export default function CalendarPage() {
           Event Calendar
         </h1>
 
-        <div className="bg-card rounded-lg shadow-lg p-1 sm:p-2 lg:p-4 overflow-hidden">
+        <div className="bg-card rounded-lg shadow-lg p-1 sm:p-2 lg:p-4 overflow-hidden [&_.fc_.fc-col-header-cell]:bg-muted [&_.fc_.fc-col-header-cell]:text-foreground [&_.fc]:border-border">
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
             headerToolbar={{
