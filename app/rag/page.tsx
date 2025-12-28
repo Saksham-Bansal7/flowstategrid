@@ -27,9 +27,9 @@ export default function RAGPage() {
       <div className="flex-1 overflow-hidden">
         <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4 flex-shrink-0">
+          <div className="flex items-center justify-between mb-4 shrink-0">
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                 Study Assistant
               </h1>
               <p className="text-muted-foreground text-sm">
@@ -43,7 +43,7 @@ export default function RAGPage() {
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-hidden min-h-0">
             {/* Left: Document List */}
             <div className="lg:col-span-1 flex flex-col gap-3 overflow-hidden">
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 <FileText className="size-4 text-primary" />
                 <h2 className="text-lg font-semibold">Your Documents</h2>
               </div>
