@@ -4,7 +4,15 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, User, Menu, X, Sparkles } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogIn, LogOut, User, Menu, X, Settings, UserCircle } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import { useUserProfile } from "@/hooks/use-user-profile";
@@ -17,17 +25,17 @@ export default function Navbar() {
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex items-center h-16">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center space-x-2 text-xl font-bold"
+            className="flex items-center space-x-2 text-xl font-bold shrink-0"
           >
             <span>FlowStateGrid</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Desktop Navigation - Centered */}
+          <div className="hidden md:flex items-center justify-center flex-1 space-x-6">
             <Link
               href="/dashboard"
               className="text-sm font-medium hover:text-primary transition-colors"
@@ -58,55 +66,62 @@ export default function Navbar() {
             >
               Events
             </Link>
-            {session && profile?.username && (
-              <Link
-                href={`/u/${profile.username}`}
-                className="text-sm font-medium hover:text-primary transition-colors"
-              >
-                Profile
-              </Link>
-            )}
-            {session && (
-              <Link
-                href="/account"
-                className="text-sm font-medium hover:text-primary transition-colors"
-              >
-                Account
-              </Link>
-            )}
           </div>
 
-          {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-3">
+          {/* Desktop Right Section - Auth */}
+          <div className="hidden md:flex items-center space-x-3 shrink-0">
             {status === "loading" ? (
               <div className="h-9 w-24 animate-pulse bg-muted rounded-md" />
             ) : session ? (
               <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-muted/50">
-                  {session.user.image ? (
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || "User"}
-                      width={24}
-                      height={24}
-                      className="rounded-full"
-                    />
-                  ) : (
-                    <User className="size-5" />
-                  )}
-                  <span className="text-sm font-medium">
-                    {session.user.name || session.user.email}
-                  </span>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => signOut()}>
-                  <LogOut />
-                  Sign Out
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-muted/50 hover:bg-muted transition-colors cursor-pointer">
+                      {session.user.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || "User"}
+                          width={24}
+                          height={24}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        <User className="size-5" />
+                      )}
+                      <span className="text-sm font-medium">
+                        {session.user.name || session.user.email}
+                      </span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {profile?.username && (
+                      <DropdownMenuItem asChild>
+                        <Link href={`/u/${profile.username}`} className="cursor-pointer">
+                          <UserCircle className="size-4" />
+                          Profile
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link href="/account" className="cursor-pointer">
+                        <Settings className="size-4" />
+                        Account Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()} variant="destructive">
+                      <LogOut className="size-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <>
                 <Button variant="ghost" size="sm" onClick={() => signIn()}>
-                  <LogIn />
+                  <LogIn className="size-4" />
                   Sign In
                 </Button>
                 <Button size="sm" onClick={() => signIn()}>
@@ -118,7 +133,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-md hover:bg-accent"
+            className="md:hidden p-2 rounded-md hover:bg-accent ml-auto"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
@@ -215,7 +230,7 @@ export default function Navbar() {
                       setMobileMenuOpen(false);
                     }}
                   >
-                    <LogOut />
+                    <LogOut className="size-4" />
                     Sign Out
                   </Button>
                 </>
@@ -229,7 +244,7 @@ export default function Navbar() {
                       setMobileMenuOpen(false);
                     }}
                   >
-                    <LogIn />
+                    <LogIn className="size-4" />
                     Sign In
                   </Button>
                   <Button
