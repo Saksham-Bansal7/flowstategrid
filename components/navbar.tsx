@@ -50,7 +50,13 @@ export default function Navbar() {
               href="/rag"
               className="text-sm font-medium hover:text-primary transition-colors"
             >
-              Study Assistant
+              Assistant
+            </Link>
+            <Link
+              href="/calendar"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Events
             </Link>
             {session && profile?.username && (
               <Link
@@ -152,7 +158,14 @@ export default function Navbar() {
               className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Study Assistant
+              Assistant
+            </Link>
+            <Link
+              href="/calendar"
+              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Events
             </Link>
             {session && profile?.username && (
               <Link
