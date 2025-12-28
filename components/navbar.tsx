@@ -12,10 +12,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogIn, LogOut, User, Menu, X, Settings, UserCircle } from "lucide-react";
+import {
+  LogIn,
+  LogOut,
+  User,
+  Menu,
+  X,
+  Settings,
+  UserCircle,
+} from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -70,6 +79,7 @@ export default function Navbar() {
 
           {/* Desktop Right Section - Auth */}
           <div className="hidden md:flex items-center space-x-3 shrink-0">
+            <ThemeToggle />
             {status === "loading" ? (
               <div className="h-9 w-24 animate-pulse bg-muted rounded-md" />
             ) : session ? (
@@ -98,7 +108,10 @@ export default function Navbar() {
                     <DropdownMenuSeparator />
                     {profile?.username && (
                       <DropdownMenuItem asChild>
-                        <Link href={`/u/${profile.username}`} className="cursor-pointer">
+                        <Link
+                          href={`/u/${profile.username}`}
+                          className="cursor-pointer"
+                        >
                           <UserCircle className="size-4" />
                           Profile
                         </Link>
@@ -111,7 +124,10 @@ export default function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => signOut()} variant="destructive">
+                    <DropdownMenuItem
+                      onClick={() => signOut()}
+                      variant="destructive"
+                    >
                       <LogOut className="size-4" />
                       Sign Out
                     </DropdownMenuItem>
@@ -202,6 +218,9 @@ export default function Navbar() {
             )}
 
             <div className="pt-3 border-t space-y-2">
+              <div className="px-2 py-2">
+                <ThemeToggle />
+              </div>
               {status === "loading" ? (
                 <div className="h-9 animate-pulse bg-muted rounded-md" />
               ) : session ? (
