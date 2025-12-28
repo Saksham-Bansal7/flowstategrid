@@ -74,39 +74,39 @@ export default function PublicProfilePage({
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background to-muted">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="space-y-6">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8 lg:py-12">
+        <div className="space-y-4 sm:space-y-6">
           {/* Profile Header */}
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-6">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                 {user.image ? (
                   <Image
                     src={user.image}
                     alt={user.name || user.username}
-                    width={120}
-                    height={120}
-                    className="rounded-full"
+                    width={80}
+                    height={80}
+                    className="rounded-full sm:w-30 sm:h-30 mx-auto sm:mx-0"
                   />
                 ) : (
-                  <div className="size-30 rounded-full bg-muted flex items-center justify-center">
-                    <span className="text-4xl font-semibold">
+                  <div className="size-20 sm:size-30 rounded-full bg-muted flex items-center justify-center mx-auto sm:mx-0">
+                    <span className="text-2xl sm:text-4xl font-semibold">
                       {user.username?.[0]?.toUpperCase() || "U"}
                     </span>
                   </div>
                 )}
 
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h1 className="text-3xl font-bold">{user.name || "Anonymous"}</h1>
-                      <p className="text-lg text-muted-foreground">@{user.username}</p>
+                <div className="flex-1 w-full">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3">
+                    <div className="text-center sm:text-left w-full sm:w-auto">
+                      <h1 className="text-2xl sm:text-3xl font-bold">{user.name || "Anonymous"}</h1>
+                      <p className="text-base sm:text-lg text-muted-foreground">@{user.username}</p>
                     </div>
                     
                     {isOwnProfile && (
-                      <Button asChild>
+                      <Button asChild className="w-full sm:w-auto">
                         <Link href="/account">
-                          <Edit className="size-4" />
+                          <Edit className="size-4 mr-2" />
                           Edit Profile
                         </Link>
                       </Button>
@@ -114,18 +114,18 @@ export default function PublicProfilePage({
                   </div>
 
                   {user.bio && (
-                    <p className="mt-3 text-muted-foreground">{user.bio}</p>
+                    <p className="mt-3 text-muted-foreground text-sm sm:text-base text-center sm:text-left">{user.bio}</p>
                   )}
 
-                  <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap gap-3 sm:gap-4 mt-4 text-xs sm:text-sm text-muted-foreground justify-center sm:justify-start">
                     {user.location && (
                       <div className="flex items-center gap-1">
-                        <MapPin className="size-4" />
+                        <MapPin className="size-3 sm:size-4" />
                         <span>{user.location}</span>
                       </div>
                     )}
                     <div className="flex items-center gap-1">
-                      <Calendar className="size-4" />
+                      <Calendar className="size-3 sm:size-4" />
                       <span>
                         Joined {new Date(user.createdAt).toLocaleDateString("en-US", {
                           month: "long",
@@ -140,52 +140,49 @@ export default function PublicProfilePage({
           </Card>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Posts</CardTitle>
+              <CardHeader className="p-3 sm:p-6">
+                <CardTitle className="text-xs sm:text-sm">Posts</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{stats.totalPosts}</p>
+              <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
+                <p className="text-2xl sm:text-3xl font-bold">{stats.totalPosts}</p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Total Reactions</CardTitle>
+              <CardHeader className="p-3 sm:p-6">
+                <CardTitle className="text-xs sm:text-sm">Total Reactions</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{stats.totalReactions}</p>
+              <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
+                <p className="text-2xl sm:text-3xl font-bold">{stats.totalReactions}</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Posts */}
           <Card>
-            <CardHeader>
-              <CardTitle>Posts</CardTitle>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-lg sm:text-xl">Posts</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               {posts && posts.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {posts.map((post: any) => (
                     <div
                       key={post.id}
-                      className="p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                      className="p-3 sm:p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                     >
-                      <div className="flex items-start justify-between">
-                        <Link
-                          href={`/feed/${post.id}`}
-                          className="flex-1"
-                        >
-                          <p className="line-clamp-3">{post.content}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <Link href={`/feed/${post.id}`} className="flex-1 min-w-0">
+                          <p className="line-clamp-3 text-sm sm:text-base">{post.content}</p>
 
                           {post.tags && post.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
+                            <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2">
                               {post.tags.map((tag: string, idx: number) => (
                                 <span
                                   key={idx}
-                                  className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
+                                  className="text-xs px-2 py-0.5 sm:py-1 rounded-full bg-primary/10 text-primary"
                                 >
                                   #{tag}
                                 </span>
@@ -193,13 +190,11 @@ export default function PublicProfilePage({
                             </div>
                           )}
 
-                          <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-3 text-xs sm:text-sm text-muted-foreground">
                             <span>{post.reactionsCount} reactions</span>
                             <span>{post.commentsCount} comments</span>
-                            <span>
-                              {formatDistanceToNow(new Date(post.createdAt), {
-                                addSuffix: true,
-                              })}
+                            <span className="hidden sm:inline">
+                              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                             </span>
                           </div>
                         </Link>
@@ -207,20 +202,20 @@ export default function PublicProfilePage({
                         {isOwnProfile && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                 <MoreVertical className="size-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                className="text-destructive"
                                 onClick={() => {
                                   setPostToDelete(post.id);
                                   setDeleteDialogOpen(true);
                                 }}
+                                className="text-destructive"
                               >
-                                <Trash2 className="size-4" />
-                                Delete Post
+                                <Trash2 className="size-4 mr-2" />
+                                Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -230,7 +225,7 @@ export default function PublicProfilePage({
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">
+                <p className="text-center text-sm sm:text-base text-muted-foreground py-8">
                   No posts yet
                 </p>
               )}
@@ -239,35 +234,21 @@ export default function PublicProfilePage({
         </div>
       </div>
 
-      {/* Delete Post Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete Post?</DialogTitle>
+            <DialogTitle>Delete Post</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete your post.
+              Are you sure you want to delete this post? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex gap-3 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
+          <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeletePost}
-              disabled={deletePost.isPending}
-            >
-              {deletePost.isPending ? (
-                <>
-                  <Loader2 className="animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
+            <Button variant="destructive" onClick={handleDeletePost} className="w-full sm:w-auto">
+              Delete
             </Button>
           </div>
         </DialogContent>

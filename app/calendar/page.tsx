@@ -10,7 +10,13 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
@@ -58,7 +64,7 @@ export default function CalendarPage() {
     try {
       const res = await fetch("/api/events");
       const data: CalendarEvent[] = await res.json();
-      
+
       // Transform data for FullCalendar
       const transformedEvents: EventInput[] = data.map((event) => ({
         id: event._id,
@@ -72,7 +78,7 @@ export default function CalendarPage() {
           description: event.description,
         },
       }));
-      
+
       setEvents(transformedEvents);
     } catch (error) {
       console.error("Failed to fetch events:", error);
@@ -88,7 +94,7 @@ export default function CalendarPage() {
     // Format dates properly for datetime-local input
     const startDate = new Date(selectInfo.start);
     const endDate = new Date(selectInfo.end);
-    
+
     // If all day, set end to same day at 23:59
     if (selectInfo.allDay) {
       endDate.setDate(endDate.getDate() - 1);
@@ -109,7 +115,7 @@ export default function CalendarPage() {
 
   const handleEventClick = (clickInfo: any) => {
     const event = clickInfo.event;
-    
+
     setEditingEventId(event.id);
     setFormData({
       title: event.title,
@@ -136,7 +142,7 @@ export default function CalendarPage() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to update event');
+        throw new Error("Failed to update event");
       }
 
       await fetchEvents();
@@ -159,7 +165,7 @@ export default function CalendarPage() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to update event');
+        throw new Error("Failed to update event");
       }
 
       await fetchEvents();
@@ -195,7 +201,7 @@ export default function CalendarPage() {
         });
 
         if (!res.ok) {
-          throw new Error('Failed to update event');
+          throw new Error("Failed to update event");
         }
       } else {
         // Create new event
@@ -210,10 +216,10 @@ export default function CalendarPage() {
         });
 
         if (!res.ok) {
-          throw new Error('Failed to create event');
+          throw new Error("Failed to create event");
         }
       }
-      
+
       setDialogOpen(false);
       await fetchEvents();
     } catch (error) {
@@ -235,7 +241,7 @@ export default function CalendarPage() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to delete event');
+        throw new Error("Failed to delete event");
       }
 
       setDialogOpen(false);
@@ -249,10 +255,10 @@ export default function CalendarPage() {
   // Helper function to format date for datetime-local input
   const formatDateTimeLocal = (date: Date): string => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
@@ -264,18 +270,24 @@ export default function CalendarPage() {
     );
   }
 
+// app/calendar/page.tsx - Replace the return section
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Event Calendar</h1>
+      <div className="w-full mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-4 lg:py-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 lg:mb-6 px-2 sm:px-0">
+          Event Calendar
+        </h1>
 
-        <div className="bg-card rounded-lg shadow-lg p-4">
+        <div className="bg-card rounded-lg shadow-lg p-1 sm:p-2 lg:p-4 overflow-hidden">
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
             headerToolbar={{
-              left: "prev,next today",
+              left: "prev,next",
               center: "title",
-              right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+              right: "today",
+            }}
+            footerToolbar={{
+              center: "dayGridMonth,timeGridWeek,listWeek",
             }}
             initialView="dayGridMonth"
             editable={true}
@@ -292,47 +304,82 @@ export default function CalendarPage() {
             eventDisplay="block"
             displayEventTime={true}
             displayEventEnd={true}
+            contentHeight="auto"
+            aspectRatio={1.5}
+            handleWindowResize={true}
+            windowResizeDelay={100}
+            views={{
+              dayGridMonth: {
+                titleFormat: { year: 'numeric', month: 'short' },
+                dayMaxEvents: 2,
+              },
+              timeGridWeek: {
+                titleFormat: { year: 'numeric', month: 'short', day: 'numeric' },
+                slotLabelFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' },
+              },
+              listWeek: {
+                titleFormat: { year: 'numeric', month: 'short', day: 'numeric' },
+              }
+            }}
+            buttonText={{
+              today: 'Today',
+              month: 'Month',
+              week: 'Week',
+              list: 'List',
+            }}
+            // Mobile-specific settings
+            dayHeaderFormat={{ weekday: 'short' }}
+            eventTimeFormat={{
+              hour: 'numeric',
+              minute: '2-digit',
+              meridiem: 'short'
+            }}
           />
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editingEventId ? "Edit Event" : "Create Event"}</DialogTitle>
+              <DialogTitle className="text-lg sm:text-xl">
+                {editingEventId ? "Edit Event" : "Create Event"}
+              </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <Label htmlFor="title">Title *</Label>
+                  <Label htmlFor="title" className="text-sm">Title *</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
                     placeholder="Event title"
+                    className="text-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description" className="text-sm">Description</Label>
                   <Input
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Event description (optional)"
+                    className="text-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="start">Start *</Label>
+                  <Label htmlFor="start" className="text-sm">Start *</Label>
                   <Input
                     id="start"
                     type="datetime-local"
                     value={formData.start}
                     onChange={(e) => setFormData({ ...formData, start: e.target.value })}
                     required
+                    className="text-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="end">End *</Label>
+                  <Label htmlFor="end" className="text-sm">End *</Label>
                   <Input
                     id="end"
                     type="datetime-local"
@@ -340,6 +387,7 @@ export default function CalendarPage() {
                     onChange={(e) => setFormData({ ...formData, end: e.target.value })}
                     required
                     min={formData.start}
+                    className="text-sm"
                   />
                 </div>
                 <div className="flex items-center space-x-2">
@@ -350,32 +398,36 @@ export default function CalendarPage() {
                     onChange={(e) => setFormData({ ...formData, allDay: e.target.checked })}
                     className="w-4 h-4"
                   />
-                  <Label htmlFor="allDay" className="cursor-pointer">All Day Event</Label>
+                  <Label htmlFor="allDay" className="cursor-pointer text-sm">
+                    All Day Event
+                  </Label>
                 </div>
                 <div>
-                  <Label htmlFor="color">Color</Label>
+                  <Label htmlFor="color" className="text-sm">Color</Label>
                   <div className="flex items-center space-x-2">
                     <Input
                       id="color"
                       type="color"
                       value={formData.color}
                       onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                      className="w-20 h-10"
+                      className="w-16 h-10"
                     />
-                    <span className="text-sm text-muted-foreground">{formData.color}</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">{formData.color}</span>
                   </div>
                 </div>
               </div>
-              <DialogFooter className="mt-6 gap-2">
+              <DialogFooter className="mt-4 sm:mt-6 gap-2 flex-col sm:flex-row">
                 {editingEventId && (
-                  <Button type="button" variant="destructive" onClick={handleDelete}>
+                  <Button type="button" variant="destructive" onClick={handleDelete} className="w-full sm:w-auto">
                     Delete
                   </Button>
                 )}
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
                   Cancel
                 </Button>
-                <Button type="submit">{editingEventId ? "Update" : "Create"}</Button>
+                <Button type="submit" className="w-full sm:w-auto">
+                  {editingEventId ? "Update" : "Create"}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
