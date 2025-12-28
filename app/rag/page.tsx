@@ -42,7 +42,7 @@ export default function RAGPage() {
                 </Button>
               )}
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl font-bold bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                   Study Assistant
                 </h1>
                 <p className="text-muted-foreground text-xs sm:text-sm">
