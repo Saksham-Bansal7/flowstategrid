@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+// @ts-ignore - agora-token doesn't have TypeScript definitions
 import { RtcTokenBuilder, RtcRole } from "agora-token";
 
 export async function POST(req: Request) {
@@ -15,9 +16,9 @@ export async function POST(req: Request) {
 
     const appId = process.env.AGORA_APP_ID!;
     const appCertificate = process.env.AGORA_APP_CERTIFICATE!;
-    const uid = 0; // 0 for dynamic assignment
+    const uid = 0;
     const role = RtcRole.PUBLISHER;
-    const expirationTimeInSeconds = 3600; // 1 hour
+    const expirationTimeInSeconds = 3600;
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
 
@@ -27,7 +28,8 @@ export async function POST(req: Request) {
       channelName,
       uid,
       role,
-      privilegeExpiredTs
+      privilegeExpiredTs,
+      privilegeExpiredTs  // Add this 7th parameter
     );
 
     return NextResponse.json({ token, appId });
