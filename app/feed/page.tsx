@@ -100,7 +100,11 @@ function FeedContent() {
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
         <div className="space-y-6 sm:space-y-8">
-          <EmailVerificationAlert email={profile?.email || session?.user?.email || ""} />
+          {!profile?.emailVerified && (
+            <EmailVerificationAlert
+              email={profile?.email || session?.user?.email || ""}
+            />
+          )}
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -230,20 +234,22 @@ function FeedContent() {
       </div>
 
       <CreatePostDialog
-  open={showCreatePost}
-  onClose={() => setShowCreatePost(false)}
-/>
+        open={showCreatePost}
+        onClose={() => setShowCreatePost(false)}
+      />
     </div>
   );
 }
 
 export default function FeedPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="size-8 animate-spin" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="size-8 animate-spin" />
+        </div>
+      }
+    >
       <FeedContent />
     </Suspense>
   );
