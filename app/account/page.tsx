@@ -32,7 +32,13 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDeleteAccount } from "@/hooks/use-user-profile";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -95,8 +101,7 @@ export default function ProfilePage() {
     try {
       await updateProfile.mutateAsync(formData);
       setIsEditing(false);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const handleCancel = () => {
@@ -155,7 +160,7 @@ export default function ProfilePage() {
         newPassword: "",
         confirmPassword: "",
       });
-      
+
       setTimeout(() => {
         setShowPasswordForm(false);
         setPasswordSuccess(false);
@@ -269,7 +274,6 @@ export default function ProfilePage() {
                       });
                     }}
                     onUploadError={(error) => {
-
                       alert(error);
                     }}
                   />
@@ -508,7 +512,10 @@ export default function ProfilePage() {
                       )}
 
                       <div className="space-y-2">
-                        <label htmlFor="currentPassword" className="text-sm font-medium">
+                        <label
+                          htmlFor="currentPassword"
+                          className="text-sm font-medium"
+                        >
                           Current Password
                         </label>
                         <div className="relative">
@@ -528,7 +535,9 @@ export default function ProfilePage() {
                           />
                           <button
                             type="button"
-                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            onClick={() =>
+                              setShowCurrentPassword(!showCurrentPassword)
+                            }
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                           >
                             {showCurrentPassword ? (
@@ -541,7 +550,10 @@ export default function ProfilePage() {
                       </div>
 
                       <div className="space-y-2">
-                        <label htmlFor="newPassword" className="text-sm font-medium">
+                        <label
+                          htmlFor="newPassword"
+                          className="text-sm font-medium"
+                        >
                           New Password
                         </label>
                         <div className="relative">
@@ -577,7 +589,10 @@ export default function ProfilePage() {
                       </div>
 
                       <div className="space-y-2">
-                        <label htmlFor="confirmPassword" className="text-sm font-medium">
+                        <label
+                          htmlFor="confirmPassword"
+                          className="text-sm font-medium"
+                        >
                           Confirm New Password
                         </label>
                         <div className="relative">
@@ -597,7 +612,9 @@ export default function ProfilePage() {
                           />
                           <button
                             type="button"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                           >
                             {showConfirmPassword ? (
@@ -648,7 +665,8 @@ export default function ProfilePage() {
               ) : (
                 <div className="p-4 rounded-lg border bg-muted/30">
                   <p className="text-sm text-muted-foreground">
-                    You signed in with OAuth (Google/GitHub). Password management is not available for OAuth accounts.
+                    You signed in with OAuth (Google/GitHub). Password
+                    management is not available for OAuth accounts.
                   </p>
                 </div>
               )}
@@ -707,7 +725,11 @@ export default function ProfilePage() {
             <DialogTitle>Are you absolutely sure?</DialogTitle>
             <DialogDescription asChild>
               <div className="space-y-2">
-                <p>This action cannot be undone. This will permanently delete your account and remove all your data from our servers, including:</p>
+                <p>
+                  This action cannot be undone. This will permanently delete
+                  your account and remove all your data from our servers,
+                  including:
+                </p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
                   <li>Your profile information</li>
                   <li>All your posts</li>

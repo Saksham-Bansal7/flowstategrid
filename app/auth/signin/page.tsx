@@ -3,7 +3,13 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Github, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -28,7 +34,7 @@ export default function SignInPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
       const result = await signIn("credentials", {
         email,
@@ -137,8 +143,8 @@ export default function SignInPage() {
                 <label htmlFor="password" className="text-sm font-medium">
                   Password
                 </label>
-                <Link 
-                  href="/auth/forgot-password" 
+                <Link
+                  href="/auth/forgot-password"
                   className="text-xs text-primary hover:underline"
                 >
                   Forgot password?
@@ -153,18 +159,17 @@ export default function SignInPage() {
                 required
               />
             </div>
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={loading}
-            >
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link href="/auth/signup" className="text-primary hover:underline font-medium">
+            <Link
+              href="/auth/signup"
+              className="text-primary hover:underline font-medium"
+            >
               Sign up
             </Link>
           </p>

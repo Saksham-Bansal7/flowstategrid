@@ -74,15 +74,17 @@ export default function StudyRoomVideo({
 
         if (mediaType === "video") {
           const remoteVideoTrack = user.videoTrack!;
-          
+
           // Get the next participant who is not the current user
           const otherParticipants = participants.filter(
             (p) => p.userId !== currentUserId
           );
-          
+
           const participantIndex = remoteUserCountRef.current;
-          const participant = otherParticipants[participantIndex] || { userName: `User ${user.uid}` };
-          
+          const participant = otherParticipants[participantIndex] || {
+            userName: `User ${user.uid}`,
+          };
+
           setRemoteUsers((prev) => {
             const newMap = new Map(prev);
             newMap.set(user.uid as number, {
@@ -91,7 +93,7 @@ export default function StudyRoomVideo({
             });
             return newMap;
           });
-          
+
           remoteUserCountRef.current++;
         }
       });
@@ -102,7 +104,10 @@ export default function StudyRoomVideo({
           newMap.delete(user.uid as number);
           return newMap;
         });
-        remoteUserCountRef.current = Math.max(0, remoteUserCountRef.current - 1);
+        remoteUserCountRef.current = Math.max(
+          0,
+          remoteUserCountRef.current - 1
+        );
       });
 
       // Join channel
@@ -119,8 +124,7 @@ export default function StudyRoomVideo({
       if (localVideoRef.current) {
         videoTrack.play(localVideoRef.current);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const toggleVideo = async () => {
@@ -145,8 +149,7 @@ export default function StudyRoomVideo({
       }
       setRemoteUsers(new Map());
       remoteUserCountRef.current = 0;
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const handleLeave = () => {

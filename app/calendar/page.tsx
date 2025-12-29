@@ -265,7 +265,7 @@ export default function CalendarPage() {
     );
   }
 
-// app/calendar/page.tsx - Replace the return section
+  // app/calendar/page.tsx - Replace the return section
   return (
     <div className="min-h-screen bg-background">
       <div className="w-full mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-4 lg:py-8">
@@ -275,7 +275,12 @@ export default function CalendarPage() {
 
         <div className="bg-card rounded-lg shadow-lg p-1 sm:p-2 lg:p-4 overflow-hidden [&_.fc_.fc-col-header-cell]:bg-muted [&_.fc_.fc-col-header-cell]:text-foreground [&_.fc]:border-border">
           <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+            plugins={[
+              dayGridPlugin,
+              timeGridPlugin,
+              interactionPlugin,
+              listPlugin,
+            ]}
             headerToolbar={{
               left: "prev,next",
               center: "title",
@@ -305,29 +310,41 @@ export default function CalendarPage() {
             windowResizeDelay={100}
             views={{
               dayGridMonth: {
-                titleFormat: { year: 'numeric', month: 'short' },
+                titleFormat: { year: "numeric", month: "short" },
                 dayMaxEvents: 2,
               },
               timeGridWeek: {
-                titleFormat: { year: 'numeric', month: 'short', day: 'numeric' },
-                slotLabelFormat: { hour: 'numeric', minute: '2-digit', meridiem: 'short' },
+                titleFormat: {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                },
+                slotLabelFormat: {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  meridiem: "short",
+                },
               },
               listWeek: {
-                titleFormat: { year: 'numeric', month: 'short', day: 'numeric' },
-              }
+                titleFormat: {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                },
+              },
             }}
             buttonText={{
-              today: 'Today',
-              month: 'Month',
-              week: 'Week',
-              list: 'List',
+              today: "Today",
+              month: "Month",
+              week: "Week",
+              list: "List",
             }}
             // Mobile-specific settings
-            dayHeaderFormat={{ weekday: 'short' }}
+            dayHeaderFormat={{ weekday: "short" }}
             eventTimeFormat={{
-              hour: 'numeric',
-              minute: '2-digit',
-              meridiem: 'short'
+              hour: "numeric",
+              minute: "2-digit",
+              meridiem: "short",
             }}
           />
         </div>
@@ -342,44 +359,60 @@ export default function CalendarPage() {
             <form onSubmit={handleSubmit}>
               <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <Label htmlFor="title" className="text-sm">Title *</Label>
+                  <Label htmlFor="title" className="text-sm">
+                    Title *
+                  </Label>
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     required
                     placeholder="Event title"
                     className="text-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="description" className="text-sm">Description</Label>
+                  <Label htmlFor="description" className="text-sm">
+                    Description
+                  </Label>
                   <Input
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     placeholder="Event description (optional)"
                     className="text-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="start" className="text-sm">Start *</Label>
+                  <Label htmlFor="start" className="text-sm">
+                    Start *
+                  </Label>
                   <Input
                     id="start"
                     type="datetime-local"
                     value={formData.start}
-                    onChange={(e) => setFormData({ ...formData, start: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, start: e.target.value })
+                    }
                     required
                     className="text-sm"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="end" className="text-sm">End *</Label>
+                  <Label htmlFor="end" className="text-sm">
+                    End *
+                  </Label>
                   <Input
                     id="end"
                     type="datetime-local"
                     value={formData.end}
-                    onChange={(e) => setFormData({ ...formData, end: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, end: e.target.value })
+                    }
                     required
                     min={formData.start}
                     className="text-sm"
@@ -390,7 +423,9 @@ export default function CalendarPage() {
                     id="allDay"
                     type="checkbox"
                     checked={formData.allDay}
-                    onChange={(e) => setFormData({ ...formData, allDay: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, allDay: e.target.checked })
+                    }
                     className="w-4 h-4"
                   />
                   <Label htmlFor="allDay" className="cursor-pointer text-sm">
@@ -398,26 +433,42 @@ export default function CalendarPage() {
                   </Label>
                 </div>
                 <div>
-                  <Label htmlFor="color" className="text-sm">Color</Label>
+                  <Label htmlFor="color" className="text-sm">
+                    Color
+                  </Label>
                   <div className="flex items-center space-x-2">
                     <Input
                       id="color"
                       type="color"
                       value={formData.color}
-                      onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, color: e.target.value })
+                      }
                       className="w-16 h-10"
                     />
-                    <span className="text-xs sm:text-sm text-muted-foreground">{formData.color}</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">
+                      {formData.color}
+                    </span>
                   </div>
                 </div>
               </div>
               <DialogFooter className="mt-4 sm:mt-6 gap-2 flex-col sm:flex-row">
                 {editingEventId && (
-                  <Button type="button" variant="destructive" onClick={handleDelete} className="w-full sm:w-auto">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleDelete}
+                    className="w-full sm:w-auto"
+                  >
                     Delete
                   </Button>
                 )}
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDialogOpen(false)}
+                  className="w-full sm:w-auto"
+                >
                   Cancel
                 </Button>
                 <Button type="submit" className="w-full sm:w-auto">

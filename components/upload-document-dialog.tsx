@@ -2,10 +2,23 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, FileText, Image as ImageIcon, File, Loader2 } from "lucide-react";
+import {
+  Upload,
+  FileText,
+  Image as ImageIcon,
+  File,
+  Loader2,
+} from "lucide-react";
 import { useUploadDocument } from "@/hooks/use-documents";
 
 export function UploadDocumentDialog() {
@@ -35,16 +48,15 @@ export function UploadDocumentDialog() {
       setFile(null);
       setTitle("");
       setSubject("");
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const getFileIcon = () => {
     if (!file) return <File className="size-8 text-muted-foreground" />;
-    
-    if (file.type === 'application/pdf') {
+
+    if (file.type === "application/pdf") {
       return <FileText className="size-8 text-red-500" />;
-    } else if (file.type.startsWith('image/')) {
+    } else if (file.type.startsWith("image/")) {
       return <ImageIcon className="size-8 text-blue-500" />;
     } else {
       return <File className="size-8 text-gray-500" />;
@@ -92,9 +104,7 @@ export function UploadDocumentDialog() {
                   <p className="text-sm text-muted-foreground">
                     Click to select file or drag and drop
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    PDF(max 10MB)
-                  </p>
+                  <p className="text-xs text-muted-foreground">PDF(max 10MB)</p>
                 </div>
               )}
             </label>

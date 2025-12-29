@@ -48,7 +48,7 @@ export default function ImageUpload({
     setUploading(true);
     try {
       const base64 = await fileToBase64(file);
-      
+
       const response = await fetch("/api/user/upload-avatar", {
         method: "POST",
         headers: {
@@ -114,7 +114,7 @@ export default function ImageUpload({
             <Camera className="size-12 text-muted-foreground" />
           </div>
         )}
-        
+
         {!uploading && (
           <button
             type="button"

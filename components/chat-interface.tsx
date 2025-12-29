@@ -5,7 +5,11 @@ import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send, Loader2, MessageCircle, Sparkles, Plus } from "lucide-react";
-import { useSendMessage, useChatSessions, useDeleteChatSession } from "@/hooks/use-documents";
+import {
+  useSendMessage,
+  useChatSessions,
+  useDeleteChatSession,
+} from "@/hooks/use-documents";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -26,7 +30,10 @@ interface ChatInterfaceProps {
   documentTitle?: string;
 }
 
-export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps) {
+export function ChatInterface({
+  documentId,
+  documentTitle,
+}: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sessionId, setSessionId] = useState<string | undefined>();
@@ -73,16 +80,22 @@ export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps)
         setSessionId(response.sessionId);
       }
 
-      setMessages((prev) => [...prev, {
-        role: "assistant",
-        content: response.answer,
-        sources: response.sources,
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: response.answer,
+          sources: response.sources,
+        },
+      ]);
     } catch (error) {
-      setMessages((prev) => [...prev, {
-        role: "assistant",
-        content: "Sorry, I encountered an error. Please try again.",
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Sorry, I encountered an error. Please try again.",
+        },
+      ]);
     }
   };
 
@@ -90,8 +103,7 @@ export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps)
     if (sessionId) {
       try {
         await deleteChatSessionMutation.mutateAsync(sessionId);
-      } catch (error) {
-      }
+      } catch (error) {}
     }
     setMessages([]);
     setSessionId(undefined);
@@ -105,7 +117,9 @@ export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps)
             <MessageCircle className="size-16 text-muted-foreground mx-auto" />
             <div>
               <h3 className="text-lg font-semibold">No Document Selected</h3>
-              <p className="text-sm text-muted-foreground mt-2">Upload or select a document to start chatting</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Upload or select a document to start chatting
+              </p>
             </div>
           </div>
         </div>
@@ -119,7 +133,9 @@ export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps)
       <div className="absolute top-0 left-0 right-0 h-14 flex items-center justify-between px-4 border-b bg-muted/50 z-10">
         <div className="flex items-center gap-2">
           <Sparkles className="size-5 text-primary" />
-          <h3 className="font-semibold text-sm truncate">{documentTitle || "Document"}</h3>
+          <h3 className="font-semibold text-sm truncate">
+            {documentTitle || "Document"}
+          </h3>
         </div>
         {messages.length > 0 && (
           <Button variant="outline" size="sm" onClick={startNewChat}>
@@ -136,18 +152,34 @@ export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps)
             <div className="text-center space-y-3 max-w-md">
               <Sparkles className="size-12 text-primary mx-auto" />
               <h3 className="font-semibold">Start a Conversation</h3>
-              <p className="text-sm text-muted-foreground">Ask questions about your document.</p>
+              <p className="text-sm text-muted-foreground">
+                Ask questions about your document.
+              </p>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
             {messages.map((message, index) => (
-              <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] rounded-lg px-4 py-3 ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+              <div
+                key={index}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-lg px-4 py-3 ${
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  }`}
+                >
                   {message.role === "assistant" ? (
                     <>
                       <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                        >
                           {message.content}
                         </ReactMarkdown>
                       </div>
@@ -155,8 +187,14 @@ export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps)
                         <div className="mt-3 pt-3 border-t space-y-2">
                           <p className="text-xs font-semibold">Sources:</p>
                           {message.sources.map((source, idx) => (
-                            <div key={idx} className="bg-background/50 rounded p-2 text-xs">
-                              <p className="font-mono">Chunk {source.chunkIndex} ({(source.score * 100).toFixed(1)}%)</p>
+                            <div
+                              key={idx}
+                              className="bg-background/50 rounded p-2 text-xs"
+                            >
+                              <p className="font-mono">
+                                Chunk {source.chunkIndex} (
+                                {(source.score * 100).toFixed(1)}%)
+                              </p>
                             </div>
                           ))}
                         </div>
@@ -187,11 +225,23 @@ export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps)
             placeholder="Ask a question..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
+            onKeyDown={(e) =>
+              e.key === "Enter" &&
+              !e.shiftKey &&
+              (e.preventDefault(), handleSend())
+            }
             disabled={sendMessageMutation.isPending}
           />
-          <Button onClick={handleSend} disabled={!input.trim() || sendMessageMutation.isPending} size="icon">
-            {sendMessageMutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+          <Button
+            onClick={handleSend}
+            disabled={!input.trim() || sendMessageMutation.isPending}
+            size="icon"
+          >
+            {sendMessageMutation.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Send className="size-4" />
+            )}
           </Button>
         </div>
       </div>

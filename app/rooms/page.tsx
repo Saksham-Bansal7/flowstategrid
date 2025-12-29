@@ -37,10 +37,10 @@ export default function StudyRoomsPage() {
     maxParticipants: 20,
   });
   useEffect(() => {
-      if (status === "unauthenticated") {
-        redirect("/auth/signin");
-      }
-    }, [status]);
+    if (status === "unauthenticated") {
+      redirect("/auth/signin");
+    }
+  }, [status]);
 
   const { data: rooms, isLoading } = useQuery({
     queryKey: ["rooms"],

@@ -29,7 +29,10 @@ interface LocationPickerProps {
   onChange: (value: string) => void;
 }
 
-export default function LocationPicker({ value, onChange }: LocationPickerProps) {
+export default function LocationPicker({
+  value,
+  onChange,
+}: LocationPickerProps) {
   const [open, setOpen] = React.useState(false);
   const [searchValue, setSearchValue] = React.useState("");
   const [options, setOptions] = React.useState<LocationOption[]>([]);
@@ -54,14 +57,14 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?` +
-        `q=${encodeURIComponent(query)}` +
-        `&format=json` +
-        `&addressdetails=1` +
-        `&limit=10`,
+          `q=${encodeURIComponent(query)}` +
+          `&format=json` +
+          `&addressdetails=1` +
+          `&limit=10`,
         {
           headers: {
-            'Accept': 'application/json',
-          }
+            Accept: "application/json",
+          },
         }
       );
 
@@ -69,25 +72,29 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
 
       const locationOptions: LocationOption[] = data
         .map((item: any) => {
-          const city = item.address?.city || 
-                       item.address?.town || 
-                       item.address?.village || 
-                       item.address?.municipality ||
-                       item.name;
-          
-          const country = item.address?.country || 'Unknown';
+          const city =
+            item.address?.city ||
+            item.address?.town ||
+            item.address?.village ||
+            item.address?.municipality ||
+            item.name;
+
+          const country = item.address?.country || "Unknown";
           const state = item.address?.state;
-          
-          const label = state 
-            ? `${city}, ${state}, ${country}` 
+
+          const label = state
+            ? `${city}, ${state}, ${country}`
             : `${city}, ${country}`;
-          
+
           return {
             value: label,
             label: label,
           };
         })
-        .filter((item: LocationOption) => item.label && !item.label.includes('Unknown'));
+        .filter(
+          (item: LocationOption) =>
+            item.label && !item.label.includes("Unknown")
+        );
 
       setOptions(locationOptions);
     } catch (error) {
@@ -136,9 +143,7 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
                   Type at least 2 characters to search
                 </div>
               ) : (
-                <div className="py-6 text-center text-sm">
-                  No cities found
-                </div>
+                <div className="py-6 text-center text-sm">No cities found</div>
               )}
             </CommandEmpty>
             <CommandGroup>

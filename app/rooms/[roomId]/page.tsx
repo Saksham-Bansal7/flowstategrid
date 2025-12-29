@@ -88,25 +88,25 @@ export default function RoomPage({
   }, [joined, roomId]);
 
   const handleJoin = async () => {
-  try {
-    const response = await fetch(`/api/rooms/${roomId}/join`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
+    try {
+      const response = await fetch(`/api/rooms/${roomId}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      setParticipants(data.room?.participants || []);
-      setJoined(true);
-    } else {
-      const data = await response.json();
-      setError(data.error);
+      if (response.ok) {
+        const data = await response.json();
+        setParticipants(data.room?.participants || []);
+        setJoined(true);
+      } else {
+        const data = await response.json();
+        setError(data.error);
+      }
+    } catch (error) {
+      setError("Failed to join room");
     }
-  } catch (error) {
-    setError("Failed to join room");
-  }
-};
+  };
 
   const handleLeave = async () => {
     setJoined(false); // Prevent beforeunload popup
@@ -145,16 +145,18 @@ export default function RoomPage({
   }
 
   return (
-  <div className="min-h-screen bg-linear-to-br from-background to-muted">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <StudyRoomVideo
-        channelName={roomId}
-        onLeave={handleLeave}
-        participants={participants}
-        currentUserId={session.user.id!}
-        currentUserName={session.user.name || session.user.email?.split('@')[0] || 'You'}
-      />
+    <div className="min-h-screen bg-linear-to-br from-background to-muted">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <StudyRoomVideo
+          channelName={roomId}
+          onLeave={handleLeave}
+          participants={participants}
+          currentUserId={session.user.id!}
+          currentUserName={
+            session.user.name || session.user.email?.split("@")[0] || "You"
+          }
+        />
+      </div>
     </div>
-  </div>
-);
+  );
 }

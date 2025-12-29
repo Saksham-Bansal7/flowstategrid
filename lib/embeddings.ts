@@ -6,11 +6,10 @@ const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
     const output = await hf.featureExtraction({
-      model: 'sentence-transformers/all-mpnet-base-v2', // Changed back to 768 dimensions
+      model: 'sentence-transformers/all-mpnet-base-v2',
       inputs: text,
     });
 
-    // Convert to regular number array
     if (Array.isArray(output)) {
       const data = Array.isArray(output[0]) ? output[0] : output;
       return Array.from(data) as number[];
@@ -35,13 +34,13 @@ export async function generateBatchEmbeddings(texts: string[]): Promise<number[]
 
     const batchEmbeddings = await Promise.all(
       batch.map(async (text) => {
-        await new Promise((resolve) => setTimeout(resolve, 300)); // Slightly longer delay for larger model
+        await new Promise((resolve) => setTimeout(resolve, 300));
         return generateEmbedding(text);
       })
     );
 
     embeddings.push(...batchEmbeddings);
-
+  }
 
   return embeddings;
 }
