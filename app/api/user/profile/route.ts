@@ -21,7 +21,7 @@ export async function GET(req: Request) {
     }
 
     await connectDB();
-    const user = await User.findById(session.user.id).select("-password").lean();
+    const user = await User.findById(session.user.id).lean();
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -36,6 +36,7 @@ export async function GET(req: Request) {
       bio: user.bio,
       location: user.location,
       emailVerified: user.emailVerified,
+      hasPassword: !!user.password, // Add this field
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });

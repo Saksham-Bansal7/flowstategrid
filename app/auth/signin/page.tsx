@@ -18,13 +18,12 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-
   useEffect(() => {
-    
     if (session) {
       router.push("/dashboard");
     }
   }, [session]);
+
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -34,13 +33,12 @@ export default function SignInPage() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false, // Don't redirect automatically
+        redirect: false,
       });
 
       if (result?.error) {
         setError("Invalid email or password");
       } else if (result?.ok) {
-        // Redirect to dashboard on success
         window.location.href = "/dashboard";
       }
     } catch (error) {
@@ -136,9 +134,17 @@ export default function SignInPage() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </label>
+                <Link 
+                  href="/auth/forgot-password" 
+                  className="text-xs text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"

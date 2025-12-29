@@ -9,36 +9,42 @@ export function getVerificationTokenExpiry(): Date {
   return new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 }
 
+export function generatePasswordResetToken(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+export function getPasswordResetTokenExpiry(): Date {
+  return new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+}
+
 export async function sendVerificationEmail(email: string, token: string) {
   const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`;
   
-  // For development: Just log the URL
-  console.log('📧 Verification email for:', email);
-  console.log('🔗 Verification URL:', verificationUrl);
+  // Console logging for development
+  console.log('\n========================================');
+  console.log('📧 VERIFICATION EMAIL');
+  console.log('========================================');
+  console.log('To:', email);
+  console.log('Subject: Verify your FlowStateGrid account');
+  console.log('🔗 Verification Link:', verificationUrl);
+  console.log('⏰ Expires in: 24 hours');
+  console.log('========================================\n');
   
-  // TODO: In production, use a real email service like:
-  // - Resend (https://resend.com)
-  // - SendGrid
-  // - AWS SES
-  // - Nodemailer with SMTP
+  return { success: true, devMode: true };
+}
+
+export async function sendPasswordResetEmail(email: string, token: string) {
+  const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
   
-  /*
-  // Example with Resend:
-  const { Resend } = require('resend');
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  // Console logging for development
+  console.log('\n========================================');
+  console.log('🔒 PASSWORD RESET EMAIL');
+  console.log('========================================');
+  console.log('To:', email);
+  console.log('Subject: Reset your FlowStateGrid password');
+  console.log('🔗 Reset Link:', resetUrl);
+  console.log('⏰ Expires in: 1 hour');
+  console.log('========================================\n');
   
-  await resend.emails.send({
-    from: 'noreply@flowstategrid.com',
-    to: email,
-    subject: 'Verify your email address',
-    html: `
-      <h1>Welcome to FlowStateGrid!</h1>
-      <p>Click the link below to verify your email address:</p>
-      <a href="${verificationUrl}">Verify Email</a>
-      <p>This link will expire in 24 hours.</p>
-    `
-  });
-  */
-  
-  return { success: true };
+  return { success: true, devMode: true };
 }

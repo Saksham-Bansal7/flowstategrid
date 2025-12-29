@@ -12,6 +12,7 @@ interface UserProfile {
   bio?: string;
   location?: string;
   emailVerified?: string | null;
+  hasPassword?: boolean; // Add this line
   createdAt: string;
   updatedAt: string;
 }
@@ -67,6 +68,7 @@ export function useUpdateUserProfile() {
     },
   });
 }
+
 export function useDeleteAccount() {
   const queryClient = useQueryClient();
   const router = useRouter();

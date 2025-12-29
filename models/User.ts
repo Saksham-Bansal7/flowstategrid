@@ -5,7 +5,7 @@ export interface IUser {
   _id: string;
   name?: string;
   email: string;
-  username?: string; // New field
+  username?: string;
   emailVerified?: Date | null;
   image?: string;
   password?: string;
@@ -13,6 +13,8 @@ export interface IUser {
   location?: string;
   verificationToken?: string;
   verificationTokenExpiry?: Date;
+  resetPasswordToken?: string;
+  resetPasswordTokenExpiry?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,7 +23,7 @@ const UserSchema = new Schema<IUser>(
   {
     name: { type: String },
     email: { type: String, required: true, unique: true },
-    username: { type: String, unique: true, sparse: true }, // sparse allows multiple null values
+    username: { type: String, unique: true, sparse: true },
     emailVerified: { type: Date, default: null },
     image: { type: String },
     password: { type: String },
@@ -29,6 +31,8 @@ const UserSchema = new Schema<IUser>(
     location: { type: String, maxlength: 100 },
     verificationToken: { type: String },
     verificationTokenExpiry: { type: Date },
+    resetPasswordToken: { type: String },
+    resetPasswordTokenExpiry: { type: Date },
   },
   {
     timestamps: true,

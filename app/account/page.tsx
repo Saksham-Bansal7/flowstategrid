@@ -13,7 +13,7 @@ import ImageUpload from "@/components/image-upload";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LocationPicker from "@/components/location-picker";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import {
   Loader2,
@@ -23,9 +23,13 @@ import {
   Calendar,
   Check,
   X,
+  Lock,
+  Shield,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import Image from "next/image";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDeleteAccount } from "@/hooks/use-user-profile";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -35,7 +39,6 @@ export default function ProfilePage() {
   const { data: profile, isLoading, error } = useUserProfile();
   const updateProfile = useUpdateUserProfile();
   const queryClient = useQueryClient();
-
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -45,8 +48,22 @@ export default function ProfilePage() {
   });
   const deleteAccount = useDeleteAccount();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const router = useRouter();
-    const handleDeleteAccount = async () => {
+
+  // Password change state
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleDeleteAccount = async () => {
     try {
       await deleteAccount.mutateAsync();
       signOut({ callbackUrl: "/" });
@@ -54,7 +71,6 @@ export default function ProfilePage() {
       alert("Failed to delete account");
     }
   };
-  
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -98,6 +114,64 @@ export default function ProfilePage() {
     setIsEditing(false);
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess(false);
+
+    // Validation
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters");
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      setPasswordError("New password must be different from current password");
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to change password");
+      }
+
+      setPasswordSuccess(true);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      
+      // Hide form after 2 seconds
+      setTimeout(() => {
+        setShowPasswordForm(false);
+        setPasswordSuccess(false);
+      }, 2000);
+    } catch (err: any) {
+      setPasswordError(err.message);
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -124,6 +198,8 @@ export default function ProfilePage() {
     return null;
   }
 
+  // Check if user has password (not OAuth) - uses the hasPassword field from API
+  const hasPassword = profile.hasPassword;
   return (
     <div className="min-h-screen bg-linear-to-br from-background to-muted">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -194,7 +270,6 @@ export default function ProfilePage() {
                   <ImageUpload
                     currentImage={profile.image || undefined}
                     onUploadSuccess={(imageUrl) => {
-                      // Invalidate and refetch profile
                       queryClient.invalidateQueries({
                         queryKey: ["user-profile"],
                       });
@@ -390,6 +465,202 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
+          {/* Security Section */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Shield className="size-5 text-primary" />
+                <CardTitle>Security</CardTitle>
+              </div>
+              <CardDescription>
+                Manage your password and security settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {hasPassword ? (
+                <>
+                  {!showPasswordForm ? (
+                    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
+                      <div className="flex items-center gap-3">
+                        <Lock className="size-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">Password</p>
+                          <p className="text-sm text-muted-foreground">
+                            Last changed recently
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowPasswordForm(true)}
+                      >
+                        Change Password
+                      </Button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handlePasswordChange} className="space-y-4">
+                      {passwordSuccess && (
+                        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm flex items-center gap-2">
+                          <Check className="size-4" />
+                          Password changed successfully!
+                        </div>
+                      )}
+
+                      {passwordError && (
+                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                          {passwordError}
+                        </div>
+                      )}
+
+                      <div className="space-y-2">
+                        <label htmlFor="currentPassword" className="text-sm font-medium">
+                          Current Password
+                        </label>
+                        <div className="relative">
+                          <Input
+                            id="currentPassword"
+                            type={showCurrentPassword ? "text" : "password"}
+                            placeholder="Enter current password"
+                            value={passwordData.currentPassword}
+                            onChange={(e) =>
+                              setPasswordData({
+                                ...passwordData,
+                                currentPassword: e.target.value,
+                              })
+                            }
+                            required
+                            disabled={passwordLoading}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showCurrentPassword ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label htmlFor="newPassword" className="text-sm font-medium">
+                          New Password
+                        </label>
+                        <div className="relative">
+                          <Input
+                            id="newPassword"
+                            type={showNewPassword ? "text" : "password"}
+                            placeholder="Enter new password"
+                            value={passwordData.newPassword}
+                            onChange={(e) =>
+                              setPasswordData({
+                                ...passwordData,
+                                newPassword: e.target.value,
+                              })
+                            }
+                            required
+                            disabled={passwordLoading}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showNewPassword ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                          </button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          At least 6 characters
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label htmlFor="confirmPassword" className="text-sm font-medium">
+                          Confirm New Password
+                        </label>
+                        <div className="relative">
+                          <Input
+                            id="confirmPassword"
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Confirm new password"
+                            value={passwordData.confirmPassword}
+                            onChange={(e) =>
+                              setPasswordData({
+                                ...passwordData,
+                                confirmPassword: e.target.value,
+                              })
+                            }
+                            required
+                            disabled={passwordLoading}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button type="submit" disabled={passwordLoading}>
+                          {passwordLoading ? (
+                            <>
+                              <Loader2 className="animate-spin" />
+                              Changing...
+                            </>
+                          ) : (
+                            <>
+                              <Check />
+                              Change Password
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setShowPasswordForm(false);
+                            setPasswordData({
+                              currentPassword: "",
+                              newPassword: "",
+                              confirmPassword: "",
+                            });
+                            setPasswordError("");
+                            setPasswordSuccess(false);
+                          }}
+                          disabled={passwordLoading}
+                        >
+                          <X />
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+                </>
+              ) : (
+                <div className="p-4 rounded-lg border bg-muted/30">
+                  <p className="text-sm text-muted-foreground">
+                    You signed in with OAuth (Google/GitHub). Password management is not available for OAuth accounts.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Account Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
@@ -413,9 +684,9 @@ export default function ProfilePage() {
                 </p>
               </CardContent>
             </Card>
-            
           </div>
-        {/* Delete Account Section */}
+
+          {/* Delete Account Section */}
           <Card className="border-destructive">
             <CardHeader>
               <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -436,46 +707,46 @@ export default function ProfilePage() {
       </div>
 
       {/* Delete Confirmation Dialog */}
-<Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Are you absolutely sure?</DialogTitle>
-      <DialogDescription asChild>
-        <div className="space-y-2">
-          <p>This action cannot be undone. This will permanently delete your account and remove all your data from our servers, including:</p>
-          <ul className="list-disc list-inside space-y-1 text-sm">
-            <li>Your profile information</li>
-            <li>All your posts</li>
-            <li>All your comments</li>
-            <li>All your reactions</li>
-          </ul>
-        </div>
-      </DialogDescription>
-    </DialogHeader>
-    <div className="flex gap-3 justify-end">
-      <Button
-        variant="outline"
-        onClick={() => setShowDeleteDialog(false)}
-      >
-        Cancel
-      </Button>
-      <Button
-        variant="destructive"
-        onClick={handleDeleteAccount}
-        disabled={deleteAccount.isPending}
-      >
-        {deleteAccount.isPending ? (
-          <>
-            <Loader2 className="animate-spin" />
-            Deleting...
-          </>
-        ) : (
-          "Yes, delete my account"
-        )}
-      </Button>
-    </div>
-  </DialogContent>
-</Dialog>
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogDescription asChild>
+              <div className="space-y-2">
+                <p>This action cannot be undone. This will permanently delete your account and remove all your data from our servers, including:</p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>Your profile information</li>
+                  <li>All your posts</li>
+                  <li>All your comments</li>
+                  <li>All your reactions</li>
+                </ul>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleteAccount.isPending}
+            >
+              {deleteAccount.isPending ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Yes, delete my account"
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

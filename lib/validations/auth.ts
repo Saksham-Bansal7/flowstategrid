@@ -1,3 +1,4 @@
+// lib/validations/auth.ts
 import { z } from "zod";
 
 // Username validation helper
@@ -6,7 +7,7 @@ const usernameSchema = z
   .min(3, "Username must be at least 3 characters")
   .max(20, "Username must be less than 20 characters")
   .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores")
-  .transform(val => val.toLowerCase()); // Normalize to lowercase
+  .transform(val => val.toLowerCase());
 
 // Signup validation
 export const signupSchema = z.object({
@@ -38,8 +39,24 @@ export const resendVerificationSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
+// Forgot password validation
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+// Reset password validation
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(100, "Password is too long"),
+});
+
 // Types
 export type SignupInput = z.infer<typeof signupSchema>;
 export type SigninInput = z.infer<typeof signinSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
