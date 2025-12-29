@@ -72,14 +72,12 @@ export default function ProfilePage() {
     }
   };
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
       redirect("/auth/signin");
     }
   }, [status]);
 
-  // Initialize form data when profile loads
   useEffect(() => {
     if (profile) {
       setFormData({
@@ -98,7 +96,6 @@ export default function ProfilePage() {
       await updateProfile.mutateAsync(formData);
       setIsEditing(false);
     } catch (error) {
-      console.error("Failed to update profile:", error);
     }
   };
 
@@ -119,7 +116,6 @@ export default function ProfilePage() {
     setPasswordError("");
     setPasswordSuccess(false);
 
-    // Validation
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setPasswordError("New passwords do not match");
       return;
@@ -160,7 +156,6 @@ export default function ProfilePage() {
         confirmPassword: "",
       });
       
-      // Hide form after 2 seconds
       setTimeout(() => {
         setShowPasswordForm(false);
         setPasswordSuccess(false);
@@ -198,7 +193,6 @@ export default function ProfilePage() {
     return null;
   }
 
-  // Check if user has password (not OAuth) - uses the hasPassword field from API
   const hasPassword = profile.hasPassword;
   return (
     <div className="min-h-screen bg-linear-to-br from-background to-muted">
@@ -275,7 +269,7 @@ export default function ProfilePage() {
                       });
                     }}
                     onUploadError={(error) => {
-                      console.error("Upload error:", error);
+
                       alert(error);
                     }}
                   />

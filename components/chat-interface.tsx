@@ -79,7 +79,6 @@ export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps)
         sources: response.sources,
       }]);
     } catch (error) {
-      console.error("Send message error:", error);
       setMessages((prev) => [...prev, {
         role: "assistant",
         content: "Sorry, I encountered an error. Please try again.",
@@ -92,7 +91,6 @@ export function ChatInterface({ documentId, documentTitle }: ChatInterfaceProps)
       try {
         await deleteChatSessionMutation.mutateAsync(sessionId);
       } catch (error) {
-        console.error("Error deleting session:", error);
       }
     }
     setMessages([]);

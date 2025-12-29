@@ -27,7 +27,6 @@ export default function EmailVerificationAlert({ email }: EmailVerificationAlert
         setTimeout(() => setSent(false), 3000);
       }
     } catch (error) {
-      console.error("Failed to send verification email");
     } finally {
       setSending(false);
     }

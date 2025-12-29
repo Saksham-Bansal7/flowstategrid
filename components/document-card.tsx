@@ -62,7 +62,6 @@ export function DocumentCard({ document, isSelected, onSelect }: DocumentCardPro
       await deleteMutation.mutateAsync(document.id);
       setShowDeleteConfirm(false);
     } catch (error) {
-      console.error("Delete error:", error);
     }
   };
 

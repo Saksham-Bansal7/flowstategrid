@@ -38,8 +38,6 @@ export async function POST(req: Request) {
     user.resetPasswordTokenExpiry = resetTokenExpiry;
     await user.save();
 
-    console.log('🔑 Password reset token generated for:', email);
-
     // Send reset email
     await sendPasswordResetEmail(email, resetToken);
 

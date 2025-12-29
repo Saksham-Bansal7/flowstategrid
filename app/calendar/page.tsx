@@ -81,7 +81,6 @@ export default function CalendarPage() {
 
       setEvents(transformedEvents);
     } catch (error) {
-      console.error("Failed to fetch events:", error);
     } finally {
       setLoading(false);
     }
@@ -147,7 +146,6 @@ export default function CalendarPage() {
 
       await fetchEvents();
     } catch (error) {
-      console.error("Failed to update event:", error);
       dropInfo.revert();
     }
   };
@@ -170,7 +168,6 @@ export default function CalendarPage() {
 
       await fetchEvents();
     } catch (error) {
-      console.error("Failed to update event:", error);
       resizeInfo.revert();
     }
   };
@@ -223,7 +220,6 @@ export default function CalendarPage() {
       setDialogOpen(false);
       await fetchEvents();
     } catch (error) {
-      console.error("Failed to save event:", error);
       alert("Failed to save event. Please try again.");
     }
   };
@@ -247,7 +243,6 @@ export default function CalendarPage() {
       setDialogOpen(false);
       await fetchEvents();
     } catch (error) {
-      console.error("Failed to delete event:", error);
       alert("Failed to delete event. Please try again.");
     }
   };

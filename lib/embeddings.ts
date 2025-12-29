@@ -41,9 +41,7 @@ export async function generateBatchEmbeddings(texts: string[]): Promise<number[]
     );
 
     embeddings.push(...batchEmbeddings);
-    
-    console.log(`Processed ${Math.min(i + 5, texts.length)}/${texts.length} chunks`);
-  }
+
 
   return embeddings;
 }

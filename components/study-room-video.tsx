@@ -120,7 +120,6 @@ export default function StudyRoomVideo({
         videoTrack.play(localVideoRef.current);
       }
     } catch (error) {
-      console.error("Agora init error:", error);
     }
   };
 
@@ -147,7 +146,6 @@ export default function StudyRoomVideo({
       setRemoteUsers(new Map());
       remoteUserCountRef.current = 0;
     } catch (error) {
-      console.error("Cleanup error:", error);
     }
   };
 

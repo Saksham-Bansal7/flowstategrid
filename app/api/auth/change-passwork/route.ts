@@ -62,11 +62,8 @@ export async function POST(req: Request) {
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password
     user.password = hashedPassword;
     await user.save();
-
-    console.log('✅ Password changed successfully for:', user.email);
 
     return NextResponse.json({
       message: "Password changed successfully",

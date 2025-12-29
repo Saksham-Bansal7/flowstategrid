@@ -36,7 +36,6 @@ export function UploadDocumentDialog() {
       setTitle("");
       setSubject("");
     } catch (error) {
-      console.error("Upload error:", error);
     }
   };
 

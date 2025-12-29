@@ -42,7 +42,6 @@ export default function SignInPage() {
         window.location.href = "/dashboard";
       }
     } catch (error) {
-      console.error("Sign in error:", error);
       setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);

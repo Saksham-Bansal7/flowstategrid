@@ -91,7 +91,6 @@ export default function LocationPicker({ value, onChange }: LocationPickerProps)
 
       setOptions(locationOptions);
     } catch (error) {
-      console.error("Failed to fetch locations:", error);
       setOptions([]);
     } finally {
       setIsLoading(false);

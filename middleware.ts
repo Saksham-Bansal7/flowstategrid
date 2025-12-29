@@ -17,21 +17,11 @@ export default withAuth(
     
     const isProtected = isDashboard || isRooms || isProfile || isFeed || isAccount || isStudyAssistant || isCalendar;
 
-    console.log("🔒 Middleware running:", {
-      path: req.nextUrl.pathname,
-      isAuth,
-      token: token ? { email: token.email, id: token.id } : null,
-    });
-
-    // If user is authenticated and tries to access auth pages, redirect to dashboard
     if (isAuthPage && isAuth) {
-      console.log("✅ Authenticated user on auth page -> redirecting to dashboard");
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    // If user is not authenticated and tries to access protected routes
     if (isProtected && !isAuth) {
-      console.log("❌ Unauthenticated user on protected page -> redirecting to signin");
       let from = req.nextUrl.pathname;
       if (req.nextUrl.search) {
         from += req.nextUrl.search;
@@ -42,8 +32,6 @@ export default withAuth(
       );
     }
 
-    // Allow the request to proceed
-    console.log("✅ Request allowed to proceed");
     return NextResponse.next();
   },
   {

@@ -97,7 +97,6 @@ export default function RoomPage({
 
     if (response.ok) {
       const data = await response.json();
-      console.log("Join response:", data); // Debug log
       setParticipants(data.room?.participants || []);
       setJoined(true);
     } else {

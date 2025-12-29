@@ -36,8 +36,6 @@ export async function POST(req: Request) {
     user.resetPasswordTokenExpiry = undefined;
     await user.save();
 
-    console.log('✅ Password reset successful for:', user.email);
-
     return NextResponse.json({
       message: "Password reset successful. You can now sign in with your new password.",
     });

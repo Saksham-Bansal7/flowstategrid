@@ -66,7 +66,6 @@ export default function ImageUpload({
       onUploadSuccess(data.image);
       setPreview(null);
     } catch (error: any) {
-      console.error("Upload error:", error);
       onUploadError?.(error.message || "Failed to upload image");
       setPreview(null);
     } finally {

@@ -39,7 +39,6 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-// Delete the cached model to ensure schema updates are applied
 if (models.User) {
   delete models.User;
 }

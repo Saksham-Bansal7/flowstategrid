@@ -8,7 +8,6 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get("token");
 
-    console.log("🔍 Verification attempt with token:", token);
 
     if (!token) {
       return NextResponse.json(
@@ -19,17 +18,8 @@ export async function GET(req: Request) {
 
     await connectDB();
 
-    // Debug: Check if ANY user exists with this token
     const allUsersWithToken = await User.findOne({ verificationToken: token });
-    console.log("👤 User with token exists:", !!allUsersWithToken);
     
-    if (allUsersWithToken) {
-      console.log("⏰ Token expiry:", allUsersWithToken.verificationTokenExpiry);
-      console.log("🕐 Current time:", new Date());
-      console.log("✅ Token valid:", allUsersWithToken.verificationTokenExpiry && allUsersWithToken.verificationTokenExpiry > new Date());
-    }
-
-    // Find user with this token
     const user = await User.findOne({
       verificationToken: token,
       verificationTokenExpiry: { $gt: new Date() }, // Token not expired
