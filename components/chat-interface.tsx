@@ -197,7 +197,8 @@ export function ChatInterface({
                             </div>
                           ))}
                         </div>
-                      )} */}
+                      )} */
+                      }
                     </>
                   ) : (
                     <p className="text-sm">{message.content}</p>
