@@ -183,7 +183,7 @@ export function ChatInterface({
                           {message.content}
                         </ReactMarkdown>
                       </div>
-                      {message.sources && message.sources.length > 0 && (
+                      {/* {message.sources && message.sources.length > 0 && (
                         <div className="mt-3 pt-3 border-t space-y-2">
                           <p className="text-xs font-semibold">Sources:</p>
                           {message.sources.map((source, idx) => (
@@ -198,7 +198,7 @@ export function ChatInterface({
                             </div>
                           ))}
                         </div>
-                      )}
+                      )} */}
                     </>
                   ) : (
                     <p className="text-sm">{message.content}</p>
