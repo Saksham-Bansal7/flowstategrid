@@ -85,7 +85,6 @@ export function ChatInterface({
         {
           role: "assistant",
           content: response.answer,
-          sources: response.sources,
         },
       ]);
     } catch (error) {
