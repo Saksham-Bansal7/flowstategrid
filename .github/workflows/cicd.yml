@@ -44,6 +44,10 @@ jobs:
     needs: build
     runs-on: self-hosted
     steps:
+      - name: Clean up Docker resources
+        run: |
+          docker system prune -a --volumes -f || true
+
       - name: Pull image from docker hub
         run: docker pull sakki29/flowstategrid:latest
       - name: Delete old container
@@ -68,4 +72,4 @@ jobs:
             -e CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}" \
             -e CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}" \
             -e NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
-            sakki29/flowstategrid:latest 
+            sakki29/flowstategrid:latest
