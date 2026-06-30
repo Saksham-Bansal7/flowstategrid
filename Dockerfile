@@ -1,14 +1,33 @@
-FROM node:20-alpine3.18 as builder
-
+FROM node:20-bullseye-slim AS builder
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y \
+  build-essential \
+  python3 \
+  pkg-config \
+  libcairo2-dev \
+  libpango1.0-dev \
+  libjpeg-dev \
+  libgif-dev \
+  librsvg2-dev \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY package*.json ./
-RUN npm install --production
+RUN npm install
 
 COPY . .
-
 RUN npm run build
 
-EXPOSE 3000
+FROM node:20-bullseye-slim AS runner
+WORKDIR /app
 
-CMD ["npm","run","start"]
+ENV NODE_ENV=production
+
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.* ./
+
+EXPOSE 3000
+CMD ["npm", "run", "start"]
