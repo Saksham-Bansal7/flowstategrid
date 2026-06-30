@@ -68,4 +68,4 @@ jobs:
             -e CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}" \
             -e CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}" \
             -e NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
-            sakki29/flowstategrid:latest
+            sakki29/flowstategrid:latest 
