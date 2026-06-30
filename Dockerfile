@@ -1,16 +1,18 @@
-FROM node:20-bullseye-slim AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-  build-essential \
-  python3 \
-  pkg-config \
-  libcairo2-dev \
-  libpango1.0-dev \
-  libjpeg-dev \
-  libgif-dev \
-  librsvg2-dev \
-  && rm -rf /var/lib/apt/lists/*
+# Install build dependencies with retry logic
+RUN apt-get update --fix-missing || apt-get update --fix-missing || true && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    python3 \
+    pkg-config \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 RUN npm install
@@ -18,7 +20,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM node:20-bullseye-slim AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
