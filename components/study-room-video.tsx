@@ -80,7 +80,7 @@ export default function StudyRoomVideo({
           const remoteVideoTrack = user.videoTrack!;
 
           const participant = participantsRef.current.find(
-            (p) => stableAgoraUid(p.userId) === Number(user.uid)
+            (p) => stableAgoraUid(p.userId) === Number(user.uid),
           );
 
           setRemoteUsers((prev) => {
@@ -100,7 +100,7 @@ export default function StudyRoomVideo({
       });
 
       // Join channel
-        await agoraClient.join(appId, channelName, token, currentAgoraUid);
+      await agoraClient.join(appId, channelName, token, currentAgoraUid);
 
       // Create and publish local video track
       const videoTrack = await AgoraRTC.createCameraVideoTrack();
@@ -169,7 +169,7 @@ export default function StudyRoomVideo({
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {Array.from(remoteUsers.entries()).map(([uid, user]) => {
           const participant = participantsRef.current.find(
-            (p) => stableAgoraUid(p.userId) === uid
+            (p) => stableAgoraUid(p.userId) === uid,
           );
 
           return (

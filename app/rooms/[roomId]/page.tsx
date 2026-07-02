@@ -60,7 +60,7 @@ export default function RoomPage({
 
       // Show confirmation when user clicks browser back button
       const confirmLeave = window.confirm(
-        "Are you sure you want to leave the room?"
+        "Are you sure you want to leave the room?",
       );
 
       if (confirmLeave) {
