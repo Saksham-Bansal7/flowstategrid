@@ -14,11 +14,27 @@ import { Input } from "@/components/ui/input";
 import { Github, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
+function getAuthErrorMessage(errorCode: string | null) {
+  switch (errorCode) {
+    case "OAuthAccountNotLinked":
+      return "An account already exists with this email. Please sign in using the original method you used for this account.";
+    case "OAuthCallback":
+      return "OAuth sign-in failed. Please try again.";
+    case "OAuthCreateAccount":
+      return "Unable to create your account with this provider. Please try again.";
+    case "AccessDenied":
+      return "Access was denied. Please allow the sign-in request to continue.";
+    default:
+      return "";
+  }
+}
 
 export default function SignInPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,6 +45,15 @@ export default function SignInPage() {
       router.push("/dashboard");
     }
   }, [session]);
+
+  useEffect(() => {
+    const authError = searchParams.get("error");
+    const message = getAuthErrorMessage(authError);
+
+    if (message) {
+      setError(message);
+    }
+  }, [searchParams]);
 
   const handleCredentialsSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +97,10 @@ export default function SignInPage() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
+              onClick={() => {
+                setError("");
+                signIn("github", { callbackUrl: "/dashboard" });
+              }}
             >
               <Github />
               Continue with GitHub
@@ -80,7 +108,10 @@ export default function SignInPage() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => {
+                setError("");
+                signIn("google", { callbackUrl: "/dashboard" });
+              }}
             >
               <svg className="size-5" viewBox="0 0 24 24">
                 <path

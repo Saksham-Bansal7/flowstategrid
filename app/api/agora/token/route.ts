@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { stableAgoraUid } from "@/lib/agora";
 // @ts-ignore - agora-token doesn't have TypeScript definitions
 import { RtcTokenBuilder, RtcRole } from "agora-token";
 
@@ -13,10 +14,10 @@ export async function POST(req: Request) {
     }
 
     const { channelName } = await req.json();
+  const uid = stableAgoraUid(session.user.id);
 
     const appId = process.env.AGORA_APP_ID!;
     const appCertificate = process.env.AGORA_APP_CERTIFICATE!;
-    const uid = 0;
     const role = RtcRole.PUBLISHER;
     const expirationTimeInSeconds = 3600;
     const currentTimestamp = Math.floor(Date.now() / 1000);

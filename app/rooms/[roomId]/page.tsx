@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import StudyRoomVideo from "@/components/study-room-video";
@@ -23,6 +24,19 @@ export default function RoomPage({
   const [participants, setParticipants] = useState<
     Array<{ userId: string; userName: string }>
   >([]);
+
+  const { data: roomData } = useQuery({
+    queryKey: ["room", roomId],
+    queryFn: async () => {
+      const response = await fetch(`/api/rooms/${roomId}`);
+      if (!response.ok) {
+        throw new Error("Failed to load room");
+      }
+      return response.json();
+    },
+    enabled: joined,
+    refetchInterval: joined ? 5000 : false,
+  });
 
   // Cleanup on unmount + beforeunload popup
   useEffect(() => {
@@ -150,7 +164,7 @@ export default function RoomPage({
         <StudyRoomVideo
           channelName={roomId}
           onLeave={handleLeave}
-          participants={participants}
+          participants={roomData?.participants || participants}
           currentUserId={session.user.id!}
           currentUserName={
             session.user.name || session.user.email?.split("@")[0] || "You"
