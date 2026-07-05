@@ -54,7 +54,7 @@ jobs:
         run: docker rm -f flowstategrid-container || true
       - name: Run docker container
         run: |
-          docker run -d -p 80:3000 \
+          docker run -d -p 127.0.0.1:3000:3000 \
             --name flowstategrid-container \
             -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
             -e NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}" \
