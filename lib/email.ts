@@ -40,7 +40,7 @@ export async function sendVerificationEmail(email: string, token: string) {
     sendSmtpEmail.subject = "Verify your FlowStateGrid account";
     sendSmtpEmail.to = [{ email }];
     sendSmtpEmail.htmlContent = getVerificationEmailHTML(verificationUrl, email);
-    sendSmtpEmail.sender = { name: "FlowStateGrid", email: "flowstategrid@gmail.com" };
+    sendSmtpEmail.sender = { name: "FlowStateGrid", email: "noreply@flowstategrid.xyz" };
 
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
     
@@ -62,7 +62,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
     sendSmtpEmail.subject = "Reset your FlowStateGrid password";
     sendSmtpEmail.to = [{ email }];
     sendSmtpEmail.htmlContent = getPasswordResetEmailHTML(resetUrl, email);
-    sendSmtpEmail.sender = { name: "FlowStateGrid", email: "flowstategrid@gmail.com" };
+    sendSmtpEmail.sender = { name: "FlowStateGrid", email: "noreply@flowstategrid.xyz" };
 
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
     
