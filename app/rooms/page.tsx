@@ -22,6 +22,8 @@ import {
 import { Plus, Users, Lock, Globe } from "lucide-react";
 import { redirect, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { AnimatePresence, motion } from "motion/react";
+import { MotionBlock, MotionCard, MotionMain } from "@/components/motion-shell";
 
 export default function StudyRoomsPage() {
   const { data: session, status } = useSession();
@@ -102,13 +104,13 @@ export default function StudyRoomsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-background to-muted">
+    <MotionMain className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="space-y-8">
           {/* Header */}
-          <div className="flex justify-between items-center">
+          <MotionBlock className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-4xl font-bold">Study Rooms</h1>
+              <h1 className="text-4xl font-bold bg-linear-to-r from-foreground via-primary to-chart-2 bg-clip-text text-transparent">Study Rooms</h1>
               <p className="text-muted-foreground mt-2">
                 Join a room and study together with others
               </p>
@@ -186,19 +188,29 @@ export default function StudyRoomsPage() {
                       </Button>
                     </div>
                   </div>
-                  {!formData.isPublic && (
-                    <div>
-                      <label className="text-sm font-medium">Password</label>
-                      <Input
-                        type="password"
-                        placeholder="Enter password"
-                        value={formData.password}
-                        onChange={(e) =>
-                          setFormData({ ...formData, password: e.target.value })
-                        }
-                      />
-                    </div>
-                  )}
+                  <AnimatePresence initial={false}>
+                    {!formData.isPublic && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <label className="text-sm font-medium">Password</label>
+                        <Input
+                          type="password"
+                          placeholder="Enter password"
+                          value={formData.password}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              password: e.target.value,
+                            })
+                          }
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   <Button
                     className="w-full"
                     onClick={handleCreateRoom}
@@ -209,17 +221,21 @@ export default function StudyRoomsPage() {
                 </div>
               </DialogContent>
             </Dialog>
-          </div>
+          </MotionBlock>
 
           {/* Rooms Grid */}
           {isLoading ? (
-            <div>Loading rooms...</div>
+            <MotionBlock className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((item) => (
+                <Card key={item} className="soft-card h-48 animate-pulse" />
+              ))}
+            </MotionBlock>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {rooms?.map((room: any) => (
+                <MotionCard key={room.id}>
                 <Card
-                  key={room.id}
-                  className="hover:shadow-lg transition-shadow"
+                  className="soft-card h-full transition-colors hover:border-primary/30"
                 >
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -253,11 +269,12 @@ export default function StudyRoomsPage() {
                     </div>
                   </CardContent>
                 </Card>
+                </MotionCard>
               ))}
             </div>
           )}
         </div>
       </div>
-    </div>
+    </MotionMain>
   );
 }
