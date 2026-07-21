@@ -25,6 +25,15 @@ import { useState } from "react";
 import Image from "next/image";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AnimatePresence, motion } from "motion/react";
+
+const navItems = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/feed", label: "Feed" },
+  { href: "/rooms", label: "Rooms" },
+  { href: "/rag", label: "Assistant" },
+  { href: "/calendar", label: "Events" },
+];
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -32,49 +41,28 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 border-b border-border/60 app-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-16">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center space-x-2 text-xl font-bold shrink-0"
+            className="flex items-center space-x-2 text-xl font-bold tracking-tight shrink-0"
           >
             <span>FlowStateGrid</span>
           </Link>
 
           {/* Desktop Navigation - Centered */}
-          <div className="hidden md:flex items-center justify-center flex-1 space-x-6">
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/feed"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Feed
-            </Link>
-            <Link
-              href="/rooms"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Rooms
-            </Link>
-            <Link
-              href="/rag"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Assistant
-            </Link>
-            <Link
-              href="/calendar"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Events
-            </Link>
+          <div className="hidden md:flex items-center justify-center flex-1 gap-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground"
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
 
           {/* Desktop Right Section - Auth */}
@@ -86,7 +74,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-muted/50 hover:bg-muted transition-colors cursor-pointer">
+                    <button className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-muted/60 hover:bg-muted transition-colors cursor-pointer quiet-ring">
                       {session.user.image ? (
                         <Image
                           src={session.user.image}
@@ -161,43 +149,26 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 space-y-3 border-t">
-            <Link
-              href="/dashboard"
-              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="md:hidden overflow-hidden border-t border-border/60"
             >
-              Dashboard
-            </Link>
-            <Link
-              href="/feed"
-              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Feed
-            </Link>
-            <Link
-              href="/rooms"
-              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Rooms
-            </Link>
-            <Link
-              href="/rag"
-              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Assistant
-            </Link>
-            <Link
-              href="/calendar"
-              className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Events
-            </Link>
+              <div className="py-4 space-y-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block px-3 py-2 rounded-md hover:bg-accent text-sm font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
             {session && profile?.username && (
               <Link
                 href={`/u/${profile.username}`}
@@ -278,8 +249,10 @@ export default function Navbar() {
                 </>
               )}
             </div>
-          </div>
-        )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );

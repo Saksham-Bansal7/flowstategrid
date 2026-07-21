@@ -5,8 +5,6 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -17,17 +15,18 @@ import {
   Heart,
   Clock,
   Timer,
-  TrendingUp,
   Users,
   MessageCircle,
   Calendar,
-  Target,
   Zap,
   Award,
   Activity,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { MotionBlock, MotionCard, MotionMain } from "@/components/motion-shell";
+import type { LucideIcon } from "lucide-react";
+import { motion } from "motion/react";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -51,23 +50,57 @@ export default function DashboardPage() {
   const todayHours = Math.floor((stats?.todayFocusTime || 0) / 60);
   const todayMinutes = (stats?.todayFocusTime || 0) % 60;
 
-  // Calculate engagement rate
-  const engagementRate = stats?.totalPosts
-    ? Math.round(((stats.totalReactions + stats.totalComments) / stats.totalPosts) * 10) / 10
-    : 0;
-
-  // Calculate today's progress (goal: 2 hours = 120 minutes)
-  const todayGoal = 120; // 2 hours
-  const todayProgress = Math.min((stats?.todayFocusTime || 0) / todayGoal * 100, 100);
+  const dashboardStats = [
+    {
+      title: "Total Posts",
+      value: String(stats?.totalPosts || 0),
+      caption: "Content shared",
+      icon: FileText,
+      tone: "blue",
+      progress: 40,
+    },
+    {
+      title: "Total Reactions",
+      value: String(stats?.totalReactions || 0),
+      caption: "Likes received",
+      icon: Heart,
+      tone: "rose",
+      progress: 40,
+    },
+    {
+      title: "Total Focus Time",
+      value: `${totalHours}h ${totalMinutes}m`,
+      caption: "In study rooms",
+      icon: Clock,
+      tone: "emerald",
+      progress: 40,
+    },
+    {
+      title: "Today's Focus",
+      value: `${todayHours}h ${todayMinutes}m`,
+      caption: "Focus time today",
+      icon: Timer,
+      tone: "violet",
+      progress: 40,
+    },
+    {
+      title: "Total Comments",
+      value: String(stats?.totalComments || 0),
+      caption: "Comments received",
+      icon: MessageCircle,
+      tone: "slate",
+      progress: 40,
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/30">
+    <MotionMain className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="space-y-8">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <MotionBlock className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-foreground via-primary to-chart-2 bg-clip-text text-transparent">
                 Dashboard
               </h1>
               <p className="text-sm md:text-base text-muted-foreground">
@@ -82,103 +115,13 @@ export default function DashboardPage() {
                 day: "numeric" 
               })}
             </Badge>
-          </div>
+          </MotionBlock>
 
           {/* Main Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
-            {/* Total Posts */}
-            <Card className="border-l-4 border-l-blue-500 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 bg-linear-to-br from-card to-blue-500/5">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Posts
-                </CardTitle>
-                <div className="p-2 bg-blue-500/10 rounded-full">
-                  <FileText className="size-4 text-blue-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-500">{stats?.totalPosts || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Content shared
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Total Reactions */}
-            <Card className="border-l-4 border-l-red-500 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 bg-linear-to-br from-card to-red-500/5">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Reactions
-                </CardTitle>
-                <div className="p-2 bg-red-500/10 rounded-full">
-                  <Heart className="size-4 text-red-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-red-500">{stats?.totalReactions || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Likes received
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Total Focus Time */}
-            <Card className="border-l-4 border-l-green-500 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 bg-linear-to-br from-card to-green-500/5">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Focus Time
-                </CardTitle>
-                <div className="p-2 bg-green-500/10 rounded-full">
-                  <Clock className="size-4 text-green-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-green-500">
-                  {totalHours}h {totalMinutes}m
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  In study rooms
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Today's Focus */}
-            <Card className="border-l-4 border-l-purple-500 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 bg-linear-to-br from-card to-purple-500/5">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Today's Focus
-                </CardTitle>
-                <div className="p-2 bg-purple-500/10 rounded-full">
-                  <Timer className="size-4 text-purple-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-purple-500">
-                  {todayHours}h {todayMinutes}m
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Focus time today
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Total Comments */}
-            <Card className="border-l-4 border-l-primary hover:shadow-xl hover:scale-[1.02] transition-all duration-300 bg-linear-to-br from-card to-primary/5">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Comments
-                </CardTitle>
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <MessageCircle className="size-4 text-primary" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-primary">{stats?.totalComments || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Comments received
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-5">
+            {dashboardStats.map((item) => (
+              <DashboardStatCard key={item.title} {...item} />
+            ))}
           </div>
 
           {/* Tabs Section */}
@@ -191,7 +134,8 @@ export default function DashboardPage() {
             <TabsContent value="overview" className="space-y-6 mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Quick Actions */}
-                <Card className="shadow-lg hover:shadow-xl transition-shadow">
+                <MotionCard>
+                <Card className="soft-card h-full">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-xl">
                       <div className="p-2 bg-primary/10 rounded-lg">
@@ -228,9 +172,11 @@ export default function DashboardPage() {
                     </Button>
                   </CardContent>
                 </Card>
+                </MotionCard>
 
                 {/* Profile Summary */}
-                <Card className="shadow-lg hover:shadow-xl transition-shadow">
+                <MotionCard>
+                <Card className="soft-card h-full">
                   <CardHeader>
                     <CardTitle className="text-xl">Profile Summary</CardTitle>
                     <CardDescription>Your account information</CardDescription>
@@ -261,11 +207,13 @@ export default function DashboardPage() {
                     </Button>
                   </CardContent>
                 </Card>
+                </MotionCard>
               </div>
             </TabsContent>
 
             <TabsContent value="activity" className="space-y-6 mt-6">
-              <Card className="shadow-lg">
+              <MotionBlock>
+              <Card className="soft-card">
                 <CardHeader>
                   <CardTitle className="text-xl">Recent Posts</CardTitle>
                   <CardDescription>Your latest content</CardDescription>
@@ -308,11 +256,136 @@ export default function DashboardPage() {
                   )}
                 </CardContent>
               </Card>
+              </MotionBlock>
             </TabsContent>
           </Tabs>
         </div>
       </div>
-    </div>
+    </MotionMain>
+  );
+}
+
+function DashboardStatCard({
+  title,
+  value,
+  caption,
+  icon: Icon,
+  tone,
+  progress,
+}: {
+  title: string;
+  value: string;
+  caption: string;
+  icon: LucideIcon;
+  tone: string;
+  progress: number;
+}) {
+  const toneClass =
+    {
+      blue: {
+        card: "from-blue-500/12 via-card to-card",
+        icon: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+        value: "text-blue-600 dark:text-blue-400",
+        rail: "bg-blue-500/10",
+        bar: "bg-blue-500/55",
+      },
+      rose: {
+        card: "from-rose-500/12 via-card to-card",
+        icon: "bg-rose-500/12 text-rose-600 dark:text-rose-400",
+        value: "text-rose-600 dark:text-rose-400",
+        rail: "bg-rose-500/10",
+        bar: "bg-rose-500/55",
+      },
+      emerald:
+        {
+          card: "from-emerald-500/12 via-card to-card",
+          icon: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400",
+          value: "text-emerald-600 dark:text-emerald-400",
+          rail: "bg-emerald-500/10",
+          bar: "bg-emerald-500/55",
+        },
+      violet:
+        {
+          card: "from-violet-500/12 via-card to-card",
+          icon: "bg-violet-500/12 text-violet-600 dark:text-violet-400",
+          value: "text-violet-600 dark:text-violet-400",
+          rail: "bg-violet-500/10",
+          bar: "bg-violet-500/55",
+        },
+      slate:
+        {
+          card: "from-slate-500/10 via-card to-card",
+          icon: "bg-slate-500/10 text-slate-600 dark:text-slate-300",
+          value: "text-slate-600 dark:text-slate-300",
+          rail: "bg-slate-500/10",
+          bar: "bg-slate-500/55",
+        },
+    }[tone] || {
+      card: "from-primary/10 via-card to-card",
+      icon: "bg-primary/10 text-primary",
+      value: "text-primary",
+      rail: "bg-primary/10",
+      bar: "bg-primary/55",
+    };
+
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 18, scale: 0.98 },
+        visible: { opacity: 1, y: 0, scale: 1 },
+      }}
+      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -6, scale: 1.015 }}
+      className="h-full"
+    >
+      <Card
+        className={`group relative h-full min-h-[210px] overflow-hidden rounded-lg border-border/80 bg-linear-to-br ${toneClass.card} shadow-sm transition-shadow hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/25`}
+      >
+        <motion.div
+          aria-hidden
+          className="absolute -right-12 -top-12 size-32 rounded-full bg-current/5 blur-2xl"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.12 }}
+        />
+        <CardContent className="relative flex h-full min-h-[210px] flex-col justify-between p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 pt-1">
+              <p className="text-base font-semibold text-muted-foreground">
+                {title}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{caption}</p>
+            </div>
+            <motion.div
+              whileHover={{ rotate: -6, scale: 1.08 }}
+              transition={{ type: "spring", stiffness: 340, damping: 18 }}
+              className={`grid size-14 shrink-0 place-items-center rounded-full ${toneClass.icon}`}
+            >
+              <Icon className="size-6" />
+            </motion.div>
+          </div>
+
+          <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.12 }}
+              className={`text-4xl font-bold tracking-tight md:text-5xl ${toneClass.value}`}
+            >
+              {value}
+            </motion.div>
+            <div className={`h-2 rounded-full ${toneClass.rail}`}>
+              <motion.div
+                className={`h-full origin-left rounded-full ${toneClass.bar}`}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: Math.max(0.08, Math.min(progress, 100) / 100) }}
+                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 

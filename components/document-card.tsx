@@ -100,66 +100,29 @@ export function DocumentCard({
   return (
     <Card
       className={`cursor-pointer transition-all hover:shadow-md ${
-        isSelected ? "ring-2 ring-primary" : ""
+        isSelected ? "bg-muted" : ""
       }`}
       onClick={document.processingStatus === "completed" ? onSelect : undefined}
     >
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3 flex-1">
-            {getFileIcon()}
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-base truncate">
-                {document.title}
-              </CardTitle>
-              <CardDescription className="text-xs truncate">
-                {document.fileName}
-              </CardDescription>
-            </div>
+        <div className="flex items-start gap-3">
+          {getFileIcon()}
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-base truncate">
+              {document.title}
+            </CardTitle>
+            <CardDescription className="text-xs truncate">
+              {document.fileName}
+            </CardDescription>
           </div>
-          {!showDeleteConfirm ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDeleteConfirm(true);
-              }}
-            >
-              <Trash2 className="size-4 text-muted-foreground hover:text-red-500" />
-            </Button>
-          ) : (
-            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDelete}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? (
-                  <Loader2 className="size-3 animate-spin" />
-                ) : (
-                  "Delete"
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-3">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{(document.fileSize / 1024).toFixed(2)} KB</span>
           {document.metadata?.pageCount && (
             <span>{document.metadata.pageCount} pages</span>
           )}
-          <span>{document.totalChunks} chunks</span>
         </div>
         <div className="flex items-center justify-between">
           {getStatusBadge()}
@@ -174,6 +137,51 @@ export function DocumentCard({
             addSuffix: true,
           })}
         </p>
+        <div className="flex gap-2 pt-2 border-t">
+          {!showDeleteConfirm ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteConfirm(true);
+              }}
+            >
+              <Trash2 className="size-4 mr-2 text-muted-foreground" />
+              Delete
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="flex-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete();
+                }}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? (
+                  <Loader2 className="size-3 animate-spin mr-2" />
+                ) : null}
+                Confirm
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteConfirm(false);
+                }}
+              >
+                Cancel
+              </Button>
+            </>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

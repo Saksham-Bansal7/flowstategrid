@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useAddReaction } from "@/hooks/use-posts";
 import { useSession } from "next-auth/react";
 import { formatDistanceToNow } from "date-fns";
+import { motion } from "motion/react";
 
 interface PostCardProps {
   post: any;
@@ -39,7 +40,13 @@ export default function PostCard({ post }: PostCardProps) {
   const displayUsername = post.user?.username || post.username;
 
   return (
-    <Card>
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      whileHover={{ y: -3 }}
+    >
+    <Card className="soft-card transition-colors hover:border-primary/30">
       <CardHeader>
         <div className="flex items-start justify-between">
           <Link
@@ -152,5 +159,6 @@ export default function PostCard({ post }: PostCardProps) {
         </div>
       </CardContent>
     </Card>
+    </motion.div>
   );
 }

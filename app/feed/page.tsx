@@ -22,6 +22,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import EmailVerificationAlert from "@/components/email-verification-alert";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import { MotionBlock, MotionMain } from "@/components/motion-shell";
 
 function FeedContent() {
   const { data: session, status } = useSession();
@@ -97,7 +98,7 @@ function FeedContent() {
   const allPosts = data?.pages.flatMap((page) => page.posts) || [];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/30">
+    <MotionMain className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
         <div className="space-y-6 sm:space-y-8">
           {!profile?.emailVerified && (
@@ -106,9 +107,9 @@ function FeedContent() {
             />
           )}
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <MotionBlock className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-foreground via-primary to-chart-2 bg-clip-text text-transparent">
                 Study Feed
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-2">
@@ -124,9 +125,10 @@ function FeedContent() {
               <span className="hidden sm:inline">Create Post</span>
               <span className="sm:hidden">New Post</span>
             </Button>
-          </div>
+          </MotionBlock>
 
-          <Card className="shadow-lg">
+          <MotionBlock>
+          <Card className="soft-card">
             <CardContent className="p-4 sm:p-6">
               <div className="space-y-4">
                 <form onSubmit={handleSearch} className="relative">
@@ -181,16 +183,17 @@ function FeedContent() {
               </div>
             </CardContent>
           </Card>
+          </MotionBlock>
 
           {searchQuery && (
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+            <MotionBlock className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <p className="text-sm text-muted-foreground">
                 Searching for: <strong>{searchQuery}</strong>
               </p>
               <Button variant="ghost" size="sm" onClick={clearSearch}>
                 Clear
               </Button>
-            </div>
+            </MotionBlock>
           )}
 
           {isLoading ? (
@@ -216,9 +219,9 @@ function FeedContent() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-6">
+            <MotionBlock className="space-y-6">
               {allPosts.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <PostCard key={post.id || post._id} post={post} />
               ))}
 
               <div ref={loadMoreRef} className="py-4">
@@ -228,7 +231,7 @@ function FeedContent() {
                   </div>
                 )}
               </div>
-            </div>
+            </MotionBlock>
           )}
         </div>
       </div>
@@ -237,7 +240,7 @@ function FeedContent() {
         open={showCreatePost}
         onClose={() => setShowCreatePost(false)}
       />
-    </div>
+    </MotionMain>
   );
 }
 

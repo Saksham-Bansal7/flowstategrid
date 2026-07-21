@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import type { EventInput } from "@fullcalendar/core";
+import { MotionBlock, MotionMain } from "@/components/motion-shell";
 
 interface CalendarEvent {
   _id: string;
@@ -267,13 +268,20 @@ export default function CalendarPage() {
 
   // app/calendar/page.tsx - Replace the return section
   return (
-    <div className="min-h-screen bg-background">
-      <div className="w-full mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-4 lg:py-8">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 lg:mb-6 px-2 sm:px-0">
-          Event Calendar
-        </h1>
+    <MotionMain className="min-h-screen">
+      <div className="w-full mx-auto px-3 sm:px-5 lg:px-8 py-5 sm:py-7 lg:py-10">
+        <MotionBlock className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
+              Event Calendar
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Plan sessions, drag events, and keep your week in view.
+            </p>
+          </div>
+        </MotionBlock>
 
-        <div className="bg-card rounded-lg shadow-lg p-1 sm:p-2 lg:p-4 overflow-hidden [&_.fc_.fc-col-header-cell]:bg-muted [&_.fc_.fc-col-header-cell]:text-foreground [&_.fc]:border-border">
+        <MotionBlock className="calendar-shell soft-card rounded-md border p-2 shadow-sm sm:p-3 lg:p-5">
           <FullCalendar
             plugins={[
               dayGridPlugin,
@@ -347,7 +355,7 @@ export default function CalendarPage() {
               meridiem: "short",
             }}
           />
-        </div>
+        </MotionBlock>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
@@ -479,6 +487,6 @@ export default function CalendarPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </MotionMain>
   );
 }
