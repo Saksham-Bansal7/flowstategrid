@@ -71,21 +71,16 @@ export async function POST(req: Request) {
       let extractedText = '';
       let pageCount = 1;
 
-      console.log('Starting text extraction for:', fileType);
-
       if (fileType === 'pdf') {
         try {
           const result = await extractTextFromPDF(buffer);
           extractedText = result.text;
           pageCount = result.pageCount;
-          console.log('PDF extraction successful. Pages:', pageCount, 'Text length:', extractedText.length);
         } catch (pdfError) {
-          console.error('PDF extraction error:', pdfError);
           throw new Error(`Failed to extract text from PDF: ${pdfError}`);
         }
       } else if (fileType === 'text') {
         extractedText = buffer.toString('utf-8');
-        console.log('Text file read successfully. Length:', extractedText.length);
       }
 
       if (!extractedText || extractedText.trim().length === 0) {
@@ -102,12 +97,8 @@ export async function POST(req: Request) {
         throw new Error('No chunks created from document');
       }
 
-      // Generate embeddings for all chunks
-      console.log('Generating embeddings...');
       const embeddings = await generateBatchEmbeddings(chunks);
-      console.log('Embeddings generated:', embeddings.length);
 
-      // Detect if it's a question paper
       const isQuestionPaper = detectQuestions(cleanedText);
 
       // Create chunk documents
@@ -122,18 +113,13 @@ export async function POST(req: Request) {
         },
       }));
 
-      // Save all chunks
-      console.log('Saving chunks to database...');
       await DocumentChunk.insertMany(chunkDocuments);
 
-      // Update document
       document.totalChunks = chunks.length;
       document.processingStatus = 'completed';
       if (!document.metadata) document.metadata = {};
       document.metadata.pageCount = pageCount;
       await document.save();
-
-      console.log('Document processing completed successfully');
 
       return NextResponse.json({
         success: true,

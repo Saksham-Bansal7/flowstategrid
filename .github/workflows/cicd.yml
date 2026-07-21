@@ -1,0 +1,75 @@
+name: Deploy FlowstateGrid application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" > .env
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env
+          echo "HUGGINGFACE_API_KEY=${{ secrets.HUGGINGFACE_API_KEY }}" >> .env
+          echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> .env
+          echo "AGORA_APP_ID=${{ secrets.AGORA_APP_ID }}" >> .env
+          echo "AGORA_APP_CERTIFICATE=${{ secrets.AGORA_APP_CERTIFICATE }}" >> .env
+          echo "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
+          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+          echo "BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}" >> .env
+          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "GITHUB_ID=${{ secrets.OAUTH_GITHUB_ID }}" >> .env
+          echo "GITHUB_SECRET=${{ secrets.OAUTH_GITHUB_SECRET }}" >> .env
+          echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env
+
+      - name: Build docker image
+        run: docker build -t sakki29/flowstategrid .
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Publish image to Docker Hub
+        run: docker push sakki29/flowstategrid:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Clean up Docker resources
+        run: |
+          docker system prune -a --volumes -f || true
+
+      - name: Pull image from docker hub
+        run: docker pull sakki29/flowstategrid:latest
+      - name: Delete old container
+        run: docker rm -f flowstategrid-container || true
+      - name: Run docker container
+        run: |
+          docker run -d -p 127.0.0.1:3000:3000 \
+            --name flowstategrid-container \
+            -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            -e NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}" \
+            -e NEXTAUTH_URL="${{ secrets.NEXTAUTH_URL }}" \
+            -e GROQ_API_KEY="${{ secrets.GROQ_API_KEY }}" \
+            -e HUGGINGFACE_API_KEY="${{ secrets.HUGGINGFACE_API_KEY }}" \
+            -e BREVO_API_KEY="${{ secrets.BREVO_API_KEY }}" \
+            -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+            -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+            -e GITHUB_ID="${{ secrets.OAUTH_GITHUB_ID }}" \
+            -e GITHUB_SECRET="${{ secrets.OAUTH_GITHUB_SECRET }}" \
+            -e AGORA_APP_ID="${{ secrets.AGORA_APP_ID }}" \
+            -e AGORA_APP_CERTIFICATE="${{ secrets.AGORA_APP_CERTIFICATE }}" \
+            -e CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+            -e CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}" \
+            -e CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}" \
+            -e NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+            sakki29/flowstategrid:latest

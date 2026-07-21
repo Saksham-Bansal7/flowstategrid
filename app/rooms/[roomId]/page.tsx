@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import StudyRoomVideo from "@/components/study-room-video";
@@ -23,6 +24,19 @@ export default function RoomPage({
   const [participants, setParticipants] = useState<
     Array<{ userId: string; userName: string }>
   >([]);
+
+  const { data: roomData } = useQuery({
+    queryKey: ["room", roomId],
+    queryFn: async () => {
+      const response = await fetch(`/api/rooms/${roomId}`);
+      if (!response.ok) {
+        throw new Error("Failed to load room");
+      }
+      return response.json();
+    },
+    enabled: joined,
+    refetchInterval: joined ? 5000 : false,
+  });
 
   // Cleanup on unmount + beforeunload popup
   useEffect(() => {
@@ -46,7 +60,7 @@ export default function RoomPage({
 
       // Show confirmation when user clicks browser back button
       const confirmLeave = window.confirm(
-        "Are you sure you want to leave the room?"
+        "Are you sure you want to leave the room?",
       );
 
       if (confirmLeave) {
@@ -88,26 +102,25 @@ export default function RoomPage({
   }, [joined, roomId]);
 
   const handleJoin = async () => {
-  try {
-    const response = await fetch(`/api/rooms/${roomId}/join`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
+    try {
+      const response = await fetch(`/api/rooms/${roomId}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      console.log("Join response:", data); // Debug log
-      setParticipants(data.room?.participants || []);
-      setJoined(true);
-    } else {
-      const data = await response.json();
-      setError(data.error);
+      if (response.ok) {
+        const data = await response.json();
+        setParticipants(data.room?.participants || []);
+        setJoined(true);
+      } else {
+        const data = await response.json();
+        setError(data.error);
+      }
+    } catch (error) {
+      setError("Failed to join room");
     }
-  } catch (error) {
-    setError("Failed to join room");
-  }
-};
+  };
 
   const handleLeave = async () => {
     setJoined(false); // Prevent beforeunload popup
@@ -146,16 +159,18 @@ export default function RoomPage({
   }
 
   return (
-  <div className="min-h-screen bg-linear-to-br from-background to-muted">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <StudyRoomVideo
-        channelName={roomId}
-        onLeave={handleLeave}
-        participants={participants}
-        currentUserId={session.user.id!}
-        currentUserName={session.user.name || session.user.email?.split('@')[0] || 'You'}
-      />
+    <div className="min-h-screen bg-linear-to-br from-background to-muted">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <StudyRoomVideo
+          channelName={roomId}
+          onLeave={handleLeave}
+          participants={roomData?.participants || participants}
+          currentUserId={session.user.id!}
+          currentUserName={
+            session.user.name || session.user.email?.split("@")[0] || "You"
+          }
+        />
+      </div>
     </div>
-  </div>
-);
+  );
 }

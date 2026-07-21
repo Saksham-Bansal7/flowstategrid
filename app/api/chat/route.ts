@@ -59,11 +59,11 @@ export async function POST(req: Request) {
 
     // Build context from retrieved chunks
     const context = relevantChunks
-      .map((chunk, idx) => {
+      .map((chunk) => {
         const truncatedContent = chunk.content.length > 400 
           ? chunk.content.substring(0, 400) + '...'
           : chunk.content;
-        return `[Source ${idx + 1}]:\n${truncatedContent}`;
+        return truncatedContent;
       })
       .join('\n\n---\n\n');
 
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
     const messages: Array<{ role: string; content: string }> = [
       {
         role: 'system',
-        content: 'You are a helpful study assistant. Answer questions based on the provided context from the user\'s notes/question papers AND the conversation history. Provide clear, well-formatted answers using markdown. Use bullet points, numbered lists for better readability. If the context contains mathematical formulas, format them using LaTeX notation (wrap in $ for inline or $$ for block). Cite which source you\'re referencing. If you need to refer to previous parts of the conversation, do so naturally.'
+        content: 'You are a helpful study assistant. Answer questions based on the provided context from the user\'s notes/question papers and the conversation history. Provide clear, well-formatted answers using markdown. Use bullet points and numbered lists for better readability. If the context contains mathematical formulas, format them using LaTeX notation (wrap in $ for inline or $$ for block). Do not mention source labels, source numbers, or citations in your response. If you need to refer to previous parts of the conversation, do so naturally.'
       },
       {
         role: 'user',
@@ -109,7 +109,11 @@ export async function POST(req: Request) {
       max_tokens: 1024,
     });
 
-    const answer = response.data.choices[0]?.message?.content || 'No response generated';
+    const answer = (response.data.choices[0]?.message?.content || 'No response generated')
+      .replace(/\[?\s*source\s*\d+\s*\]?/gi, '')
+      .replace(/\(\s*source\s*\d+\s*\)/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
 
     // Save to chat session
     const sources = relevantChunks.map((chunk) => ({

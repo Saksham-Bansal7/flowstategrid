@@ -10,7 +10,9 @@ interface EmailVerificationAlertProps {
   email: string;
 }
 
-export default function EmailVerificationAlert({ email }: EmailVerificationAlertProps) {
+export default function EmailVerificationAlert({
+  email,
+}: EmailVerificationAlertProps) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -27,7 +29,6 @@ export default function EmailVerificationAlert({ email }: EmailVerificationAlert
         setTimeout(() => setSent(false), 3000);
       }
     } catch (error) {
-      console.error("Failed to send verification email");
     } finally {
       setSending(false);
     }
@@ -43,7 +44,8 @@ export default function EmailVerificationAlert({ email }: EmailVerificationAlert
               Email Verification Required
             </p>
             <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
-              You need to verify your email to create posts, react, comment, or join rooms.
+              You need to verify your email to create posts, react, comment, or
+              join rooms.
             </p>
           </div>
           <Button

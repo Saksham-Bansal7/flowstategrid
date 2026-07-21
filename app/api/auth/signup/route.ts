@@ -39,14 +39,9 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate verification token
     const verificationToken = generateVerificationToken();
     const verificationTokenExpiry = getVerificationTokenExpiry();
 
-    console.log("🎫 Generated verification token:", verificationToken);
-    console.log("⏰ Token expires at:", verificationTokenExpiry);
-
-    // Create user
     const user = await User.create({
       name: name || email.split("@")[0],
       email,
@@ -57,10 +52,6 @@ export async function POST(req: Request) {
       verificationTokenExpiry,
     });
 
-    console.log("✅ User created with ID:", user._id);
-    console.log("🔑 Token saved:", user.verificationToken);
-
-    // Send verification email
     await sendVerificationEmail(email, verificationToken);
 
     return NextResponse.json(

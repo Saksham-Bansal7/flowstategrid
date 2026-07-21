@@ -3,8 +3,13 @@ import crypto from 'crypto';
 import * as brevo from '@getbrevo/brevo';
 
 const apiInstance = new brevo.TransactionalEmailsApi();
-if (process.env.BREVO_API_KEY) {
-  apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+const apiKey = process.env.BREVO_API_KEY?.trim();
+
+if (apiKey) {
+  apiInstance.setApiKey(
+    brevo.TransactionalEmailsApiApiKeys.apiKey,
+    apiKey
+  );
 }
 
 export function generateVerificationToken(): string {
@@ -27,34 +32,20 @@ export async function sendVerificationEmail(email: string, token: string) {
   const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`;
   
   if (!process.env.BREVO_API_KEY) {
-    console.log('\n========================================');
-    console.log('📧 VERIFICATION EMAIL');
-    console.log('========================================');
-    console.log('To:', email);
-    console.log('🔗 Verification Link:', verificationUrl);
-    console.log('⏰ Expires in: 24 hours');
-    console.log('========================================\n');
     return { success: true, devMode: true };
   }
 
   try {
-    console.log('Attempting to send verification email to:', email);
-    
     const sendSmtpEmail = new brevo.SendSmtpEmail();
     sendSmtpEmail.subject = "Verify your FlowStateGrid account";
     sendSmtpEmail.to = [{ email }];
     sendSmtpEmail.htmlContent = getVerificationEmailHTML(verificationUrl, email);
-    sendSmtpEmail.sender = { name: "FlowStateGrid", email: "noreply@flowstategrid.com" };
+    sendSmtpEmail.sender = { name: "FlowStateGrid", email: "noreply@flowstategrid.xyz" };
 
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('✅ Email sent successfully:', result);
-    console.log('Message ID:', result.body?.messageId);
     
     return { success: true, messageId: result.body?.messageId };
   } catch (error: any) {
-    console.error('❌ Brevo error:', error);
-    console.error('Error body:', error.body);
-    console.error('Error response:', error.response);
     throw error;
   }
 }
@@ -63,34 +54,20 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
   
   if (!process.env.BREVO_API_KEY) {
-    console.log('\n========================================');
-    console.log('🔒 PASSWORD RESET EMAIL');
-    console.log('========================================');
-    console.log('To:', email);
-    console.log('🔗 Reset Link:', resetUrl);
-    console.log('⏰ Expires in: 1 hour');
-    console.log('========================================\n');
     return { success: true, devMode: true };
   }
 
   try {
-    console.log('Attempting to send password reset email to:', email);
-    
     const sendSmtpEmail = new brevo.SendSmtpEmail();
     sendSmtpEmail.subject = "Reset your FlowStateGrid password";
     sendSmtpEmail.to = [{ email }];
     sendSmtpEmail.htmlContent = getPasswordResetEmailHTML(resetUrl, email);
-    sendSmtpEmail.sender = { name: "FlowStateGrid", email: "flowstategrid@gmail.com" };
+    sendSmtpEmail.sender = { name: "FlowStateGrid", email: "noreply@flowstategrid.xyz" };
 
     const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('✅ Password reset email sent successfully:', result);
-    console.log('Message ID:', result.body?.messageId);
     
     return { success: true, messageId: result.body?.messageId };
   } catch (error: any) {
-    console.error('❌ Brevo error:', error);
-    console.error('Error body:', error.body);
-    console.error('Error response:', error.response);
     throw error;
   }
 }
@@ -228,7 +205,7 @@ function getPasswordResetEmailHTML(resetUrl: string, email: string): string {
             This email was sent to <strong>${email}</strong>
           </p>
           <p style="color: #94a3b8; margin: 0; font-size: 12px;">
-            © ${new Date().getFullYear()} FlowStateGrid. All rights reserved.
+            ${new Date().getFullYear()} FlowStateGrid.
           </p>
         </div>
       </div>

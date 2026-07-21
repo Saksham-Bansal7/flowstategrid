@@ -1,7 +1,6 @@
 // lib/validations/auth.ts
 import { z } from "zod";
 
-// Username validation helper
 const usernameSchema = z
   .string()
   .min(3, "Username must be at least 3 characters")
@@ -9,7 +8,6 @@ const usernameSchema = z
   .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores")
   .transform(val => val.toLowerCase());
 
-// Signup validation
 export const signupSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long").optional(),
   email: z.string().email("Invalid email address"),

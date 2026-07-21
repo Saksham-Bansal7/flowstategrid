@@ -37,10 +37,10 @@ export default function StudyRoomsPage() {
     maxParticipants: 20,
   });
   useEffect(() => {
-      if (status === "unauthenticated") {
-        redirect("/auth/signin");
-      }
-    }, [status]);
+    if (status === "unauthenticated") {
+      redirect("/auth/signin");
+    }
+  }, [status]);
 
   const { data: rooms, isLoading } = useQuery({
     queryKey: ["rooms"],
@@ -91,7 +91,6 @@ export default function StudyRoomsPage() {
         setCreateError(data.error || "Failed to create room");
       }
     } catch (error) {
-      console.error("Failed to create room:", error);
       setCreateError("An error occurred. Please try again.");
     } finally {
       setIsCreating(false);

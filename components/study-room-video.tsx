@@ -9,7 +9,7 @@ import AgoraRTC, {
 } from "agora-rtc-sdk-ng";
 import { Button } from "@/components/ui/button";
 import { Video, VideoOff, LogOut } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { stableAgoraUid } from "@/lib/agora";
 
 interface StudyRoomVideoProps {
   channelName: string;
@@ -26,18 +26,21 @@ export default function StudyRoomVideo({
   currentUserId,
   currentUserName,
 }: StudyRoomVideoProps) {
-  const { data: session, status } = useSession();
   const [localVideoTrack, setLocalVideoTrack] =
     useState<ICameraVideoTrack | null>(null);
   const [remoteUsers, setRemoteUsers] = useState<
-    Map<number, { track: IRemoteVideoTrack; userName: string }>
+    Map<number, { track: IRemoteVideoTrack }>
   >(new Map());
   const [isVideoOn, setIsVideoOn] = useState(true);
   const localVideoRef = useRef<HTMLDivElement>(null);
   const hasInitialized = useRef(false);
   const clientRef = useRef<IAgoraRTCClient | null>(null);
   const videoTrackRef = useRef<ICameraVideoTrack | null>(null);
-  const remoteUserCountRef = useRef(0);
+  const participantsRef = useRef(participants);
+
+  useEffect(() => {
+    participantsRef.current = participants;
+  }, [participants]);
 
   useEffect(() => {
     if (!hasInitialized.current) {
@@ -59,6 +62,7 @@ export default function StudyRoomVideo({
         body: JSON.stringify({ channelName }),
       });
       const { token, appId } = await response.json();
+      const currentAgoraUid = stableAgoraUid(currentUserId);
 
       // Create client
       const agoraClient = AgoraRTC.createClient({
@@ -74,25 +78,16 @@ export default function StudyRoomVideo({
 
         if (mediaType === "video") {
           const remoteVideoTrack = user.videoTrack!;
-          
-          // Get the next participant who is not the current user
-          const otherParticipants = participants.filter(
-            (p) => p.userId !== currentUserId
+
+          const participant = participantsRef.current.find(
+            (p) => stableAgoraUid(p.userId) === Number(user.uid),
           );
-          
-          const participantIndex = remoteUserCountRef.current;
-          const participant = otherParticipants[participantIndex] || { userName: `User ${user.uid}` };
-          
+
           setRemoteUsers((prev) => {
             const newMap = new Map(prev);
-            newMap.set(user.uid as number, {
-              track: remoteVideoTrack,
-              userName: participant.userName,
-            });
+            newMap.set(user.uid as number, { track: remoteVideoTrack });
             return newMap;
           });
-          
-          remoteUserCountRef.current++;
         }
       });
 
@@ -102,11 +97,10 @@ export default function StudyRoomVideo({
           newMap.delete(user.uid as number);
           return newMap;
         });
-        remoteUserCountRef.current = Math.max(0, remoteUserCountRef.current - 1);
       });
 
       // Join channel
-      await agoraClient.join(appId, channelName, token, null);
+      await agoraClient.join(appId, channelName, token, currentAgoraUid);
 
       // Create and publish local video track
       const videoTrack = await AgoraRTC.createCameraVideoTrack();
@@ -119,9 +113,7 @@ export default function StudyRoomVideo({
       if (localVideoRef.current) {
         videoTrack.play(localVideoRef.current);
       }
-    } catch (error) {
-      console.error("Agora init error:", error);
-    }
+    } catch (error) {}
   };
 
   const toggleVideo = async () => {
@@ -145,10 +137,7 @@ export default function StudyRoomVideo({
         clientRef.current = null;
       }
       setRemoteUsers(new Map());
-      remoteUserCountRef.current = 0;
-    } catch (error) {
-      console.error("Cleanup error:", error);
-    }
+    } catch (error) {}
   };
 
   const handleLeave = () => {
@@ -178,17 +167,23 @@ export default function StudyRoomVideo({
 
       {/* Remote Videos Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {Array.from(remoteUsers.entries()).map(([uid, user]) => (
-          <div
-            key={uid}
-            className="relative bg-black rounded-lg overflow-hidden aspect-video"
-          >
-            <div id={`remote-${uid}`} className="w-full h-full" />
-            <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded-full text-xs text-white">
-              {session?.user?.name || user.userName}
+        {Array.from(remoteUsers.entries()).map(([uid, user]) => {
+          const participant = participantsRef.current.find(
+            (p) => stableAgoraUid(p.userId) === uid,
+          );
+
+          return (
+            <div
+              key={uid}
+              className="relative bg-black rounded-lg overflow-hidden aspect-video"
+            >
+              <div id={`remote-${uid}`} className="w-full h-full" />
+              <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded-full text-xs text-white">
+                {participant?.userName || `User ${uid}`}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Controls */}

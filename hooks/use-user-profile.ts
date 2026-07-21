@@ -17,7 +17,6 @@ interface UserProfile {
   updatedAt: string;
 }
 
-// Query: Fetch user profile
 export function useUserProfile() {
   const { data: session } = useSession();
 
@@ -35,7 +34,6 @@ export function useUserProfile() {
   });
 }
 
-// Mutation: Update user profile
 export function useUpdateUserProfile() {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
@@ -58,10 +56,7 @@ export function useUpdateUserProfile() {
       return response.json() as Promise<UserProfile>;
     },
     onSuccess: (data) => {
-      // Update cache with new data
       queryClient.setQueryData(["user-profile", session?.user?.id], data);
-      
-      // Also invalidate to ensure freshness
       queryClient.invalidateQueries({ 
         queryKey: ["user-profile", session?.user?.id] 
       });
@@ -87,7 +82,7 @@ export function useDeleteAccount() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.clear(); // Clear all cache
+      queryClient.clear();
     },
   });
 }
