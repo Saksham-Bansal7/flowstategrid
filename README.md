@@ -1,8 +1,13 @@
 # 📚 FlowStateGrid - AI-Powered Study Platform
 
 [![GitHub](https://img.shields.io/badge/GitHub-FlowStateGrid-181717?style=for-the-badge&logo=github)](https://github.com/Saksham-Bansal7/flowstategrid)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-flowstategrid.xyz-2563eb?style=for-the-badge&logo=vercel)](https://flowstategrid.xyz)
 
 > **FlowStateGrid** is a modern study platform that combines AI-powered learning assistance with collaborative study features. Built with Next.js and cutting-edge AI technology, it provides silent video study rooms, intelligent document analysis, social study feeds, and event scheduling to help students stay focused and achieve their academic goals.
+
+## 🌐 Production
+
+Try FlowStateGrid live at **[flowstategrid.xyz](https://flowstategrid.xyz)**.
 
 ## 🌟 Features
 
@@ -200,7 +205,7 @@ MONGODB_URI="mongodb+srv://username:password@cluster.mongodb.net/flowstategrid"
 
 # NextAuth
 NEXTAUTH_SECRET="your_nextauth_secret_here"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3000" # Use https://flowstategrid.xyz in production
 
 # OAuth Providers (Optional)
 GOOGLE_CLIENT_ID="your_google_client_id"
